@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1081" viewBox="0 0 680 383" role="img">
+<title>ภาพรวมยอดขาย บ้านสบาย ช๊อป</title>
+<desc>ยอดขายสุทธิ 14,107,737 บาท จาก 16,249 คำสั่งซื้อสำเร็จ AOV 868.22 บาท อัตรายกเลิก 4.51% เดือนยอดสูงสุด พ.ย. 2568 ต่ำสุด ก.พ. 2569 และอันดับแรกของช่องทาง ภูมิภาค จังหวัด และบริษัทขนส่ง</desc>
+<style>
+  text { font-family: Prompt, "Noto Sans Thai", "Leelawadee UI", sans-serif; }
+  .t, .th { font-size: 14px; fill: #1f2933; }
+  .th { font-weight: 500; }
+  .ts { font-size: 12px; fill: #5f6b7a; }
+  .box { fill: #f7f9fc; stroke: #d3dbe6; }
+  .c-blue > rect { fill: #e6f1fb; stroke: #185fa5; }
+  .c-blue > .th { fill: #0c447c; }
+  .c-blue > .ts { fill: #185fa5; }
+</style>
+<rect width="680" height="383" fill="#ffffff"/>
+<g class="c-blue"><rect x="40" y="20" width="141" height="72" rx="8" stroke-width="0.5"/><text class="ts" x="54" y="44" dominant-baseline="central">ยอดขายสุทธิ</text><text class="th" x="54" y="70" dominant-baseline="central">฿14,107,737</text></g>
+<g class="c-blue"><rect x="193" y="20" width="141" height="72" rx="8" stroke-width="0.5"/><text class="ts" x="207" y="44" dominant-baseline="central">คำสั่งซื้อสำเร็จ</text><text class="th" x="207" y="70" dominant-baseline="central">16,249</text></g>
+<g class="c-blue"><rect x="346" y="20" width="141" height="72" rx="8" stroke-width="0.5"/><text class="ts" x="360" y="44" dominant-baseline="central">AOV</text><text class="th" x="360" y="70" dominant-baseline="central">฿868.22</text></g>
+<g class="c-blue"><rect x="499" y="20" width="141" height="72" rx="8" stroke-width="0.5"/><text class="ts" x="513" y="44" dominant-baseline="central">อัตรายกเลิก</text><text class="th" x="513" y="70" dominant-baseline="central">4.51%</text></g>
+<rect class="box" x="40" y="108" width="380" height="92" rx="8" stroke-width="0.5"/>
+<text class="th" x="56" y="128" dominant-baseline="central">สถานะคำสั่งซื้อ</text>
+<text class="ts" x="404" y="128" text-anchor="end" dominant-baseline="central">ทั้งหมด 17,529</text>
+<rect x="56" y="144" width="322" height="14" rx="3" fill="#185FA5"/>
+<rect x="380" y="144" width="15" height="14" fill="#378ADD"/>
+<rect x="397" y="144" width="7" height="14" rx="2" fill="#85B7EB"/>
+<rect x="56" y="176" width="10" height="10" rx="2" fill="#185FA5"/><text class="ts" x="72" y="181" dominant-baseline="central">สำเร็จ 16,249</text>
+<rect x="196" y="176" width="10" height="10" rx="2" fill="#378ADD"/><text class="ts" x="212" y="181" dominant-baseline="central">ยกเลิก 790</text>
+<rect x="306" y="176" width="10" height="10" rx="2" fill="#85B7EB"/><text class="ts" x="322" y="181" dominant-baseline="central">คืนสินค้า 490</text>
+<rect class="box" x="436" y="108" width="204" height="92" rx="8" stroke-width="0.5"/>
+<text class="ts" x="452" y="126" dominant-baseline="central">เดือนยอดสูงสุด</text>
+<text class="th" x="452" y="146" dominant-baseline="central">พ.ย. 2568 · ฿1,306,940</text>
+<text class="ts" x="452" y="166" dominant-baseline="central">เดือนยอดต่ำสุด</text>
+<text class="th" x="452" y="186" dominant-baseline="central">ก.พ. 2569 · ฿962,379</text>
+<rect class="box" x="40" y="216" width="141" height="112" rx="8" stroke-width="0.5"/>
+<text class="ts" x="52" y="236" dominant-baseline="central">ช่องทางอันดับแรก</text>
+<text class="th" x="52" y="260" dominant-baseline="central">แอป</text>
+<rect x="52" y="280" width="117" height="8" rx="4" fill="#B5D4F4"/><rect x="52" y="280" width="46.5" height="8" rx="4" fill="#185FA5"/>
+<text class="ts" x="52" y="308" dominant-baseline="central">39.76% ของยอดขาย</text>
+<rect class="box" x="193" y="216" width="141" height="112" rx="8" stroke-width="0.5"/>
+<text class="ts" x="205" y="236" dominant-baseline="central">ภูมิภาคอันดับแรก</text>
+<text class="th" x="205" y="260" dominant-baseline="central">กรุงเทพฯและปริมณฑล</text>
+<rect x="205" y="280" width="117" height="8" rx="4" fill="#B5D4F4"/><rect x="205" y="280" width="52" height="8" rx="4" fill="#185FA5"/>
+<text class="ts" x="205" y="308" dominant-baseline="central">44.49% ของยอดขาย</text>
+<rect class="box" x="346" y="216" width="141" height="112" rx="8" stroke-width="0.5"/>
+<text class="ts" x="358" y="236" dominant-baseline="central">จังหวัดอันดับแรก</text>
+<text class="th" x="358" y="260" dominant-baseline="central">กรุงเทพมหานคร</text>
+<rect x="358" y="280" width="117" height="8" rx="4" fill="#B5D4F4"/><rect x="358" y="280" width="32" height="8" rx="4" fill="#185FA5"/>
+<text class="ts" x="358" y="308" dominant-baseline="central">27.37% ของยอดขาย</text>
+<rect class="box" x="499" y="216" width="141" height="112" rx="8" stroke-width="0.5"/>
+<text class="ts" x="511" y="236" dominant-baseline="central">ขนส่งอันดับแรก</text>
+<text class="th" x="511" y="260" dominant-baseline="central">ไปไว Express</text>
+<rect x="511" y="280" width="117" height="8" rx="4" fill="#B5D4F4"/><rect x="511" y="280" width="48" height="8" rx="4" fill="#185FA5"/>
+<text class="ts" x="511" y="308" dominant-baseline="central">41.14% ของยอดขาย</text>
+<text class="ts" x="340" y="352" text-anchor="middle" dominant-baseline="central">ขอบเขต: ทุกภูมิภาคและทุกหมวด · ยอดขายนับเฉพาะคำสั่งซื้อจัดส่งสำเร็จ</text>
+</svg>

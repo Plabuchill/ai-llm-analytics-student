@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1081" viewBox="0 0 680 383" role="img">
+<title>วันเมกะเซลเทียบวันปกติ</title>
+<desc>วันเมกะเซลมีสัดส่วนยอดขาย 3.44% วันยอดสูงสุดคือ 11.11 ยอด 122,718 บาท ยอดขายเฉลี่ยต่อวัน 80,799 บาท เทียบวันปกติ 37,947 บาท กำไรขั้นต้นวันเมกะเซล 24.16% เทียบวันปกติ 44.66%</desc>
+<style>
+  text { font-family: Prompt, "Noto Sans Thai", "Leelawadee UI", sans-serif; }
+  .t, .th { font-size: 14px; fill: #1f2933; }
+  .th { font-weight: 500; }
+  .ts { font-size: 12px; fill: #5f6b7a; }
+  .box { fill: #f7f9fc; stroke: #d3dbe6; }
+  .c-blue > rect { fill: #e6f1fb; stroke: #185fa5; }
+  .c-blue > .th { fill: #0c447c; }
+  .c-blue > .ts { fill: #185fa5; }
+</style>
+<rect width="680" height="383" fill="#ffffff"/>
+<g class="c-blue"><rect x="40" y="20" width="292" height="64" rx="8" stroke-width="0.5"/><text class="ts" x="56" y="40" dominant-baseline="central">สัดส่วนยอดขายวันเมกะเซล</text><text class="th" x="56" y="64" dominant-baseline="central">3.44% ของยอดขายทั้งหมด</text></g>
+<g class="c-blue"><rect x="348" y="20" width="292" height="64" rx="8" stroke-width="0.5"/><text class="ts" x="364" y="40" dominant-baseline="central">วันเมกะเซลยอดสูงสุด</text><text class="th" x="364" y="64" dominant-baseline="central">11.11 · ฿122,718</text></g>
+<rect class="box" x="40" y="100" width="292" height="222" rx="8" stroke-width="0.5"/>
+<text class="th" x="56" y="122" dominant-baseline="central">ยอดขายเฉลี่ยต่อวัน</text>
+<line x1="72" y1="290" x2="300" y2="290" stroke="#B5D4F4" stroke-width="1"/>
+<rect x="112" y="150" width="56" height="140" rx="4" fill="#185FA5"/>
+<rect x="204" y="224.3" width="56" height="65.7" rx="4" fill="#85B7EB"/>
+<text class="th" x="140" y="140" text-anchor="middle" dominant-baseline="central">฿80,799</text>
+<text class="th" x="232" y="214" text-anchor="middle" dominant-baseline="central">฿37,947</text>
+<text class="ts" x="140" y="306" text-anchor="middle" dominant-baseline="central">วันเมกะเซล</text>
+<text class="ts" x="232" y="306" text-anchor="middle" dominant-baseline="central">วันปกติ</text>
+<rect class="box" x="348" y="100" width="292" height="222" rx="8" stroke-width="0.5"/>
+<text class="th" x="364" y="122" dominant-baseline="central">% กำไรขั้นต้น</text>
+<line x1="380" y1="290" x2="608" y2="290" stroke="#B5D4F4" stroke-width="1"/>
+<rect x="420" y="214.3" width="56" height="75.7" rx="4" fill="#185FA5"/>
+<rect x="512" y="150" width="56" height="140" rx="4" fill="#85B7EB"/>
+<text class="th" x="448" y="204" text-anchor="middle" dominant-baseline="central">24.16%</text>
+<text class="th" x="540" y="140" text-anchor="middle" dominant-baseline="central">44.66%</text>
+<text class="ts" x="448" y="306" text-anchor="middle" dominant-baseline="central">วันเมกะเซล</text>
+<text class="ts" x="540" y="306" text-anchor="middle" dominant-baseline="central">วันปกติ</text>
+<text class="ts" x="340" y="348" text-anchor="middle" dominant-baseline="central">วันเมกะเซล = 10.10, 11.11, 12.12, 3.3, 6.6, 9.9 · กำไรขั้นต้น = ยอดขายสุทธิ − ต้นทุนสินค้า</text>
+</svg>
