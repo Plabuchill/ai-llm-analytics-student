@@ -130,6 +130,25 @@ def avg_ship_days(df: pd.DataFrame, region: str | None = None, carrier: str | No
     return float(df.loc[mask, "ship_days"].mean())
 
 
+def month_orders(df: pd.DataFrame, month: str) -> pd.DataFrame:
+    """คำสั่งซื้อทุกสถานะของเดือน 'YYYY-MM'"""
+    return df[df["month"] == month]
+
+
+def previous_month(month: str) -> str:
+    """เดือนก่อนหน้าของ 'YYYY-MM'"""
+    return (pd.Period(month, freq="M") - 1).strftime("%Y-%m")
+
+
+def top_products(df: pd.DataFrame, n: int = 5) -> pd.DataFrame:
+    """สินค้าที่ยอดขายสุทธิสูงสุด n อันดับ คอลัมน์ product_id, product_name, qty, net"""
+    return (_delivered(df)
+            .groupby(["product_id", "product_name"], as_index=False)[["qty", "net"]].sum()
+            .sort_values(["net", "product_id"], ascending=[False, True])
+            .head(n)
+            .reset_index(drop=True))
+
+
 def return_rate(df: pd.DataFrame, product_id: str | None = None,
                 start_date: str | None = None, end_date: str | None = None) -> float:
     """อัตราคืนสินค้า (เปอร์เซ็นต์) ของสินค้าและช่วงวันที่ที่ระบุ
