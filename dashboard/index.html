@@ -1,0 +1,1338 @@
+<style>
+  @font-face { font-family: 'Prompt'; font-style: normal; font-weight: 400; font-display: swap; src: url("/_blob/8c332fa576a99aef459ccc1dcd8ddbb5") format('truetype'); }
+  @font-face { font-family: 'Prompt'; font-style: normal; font-weight: 700; font-display: swap; src: url("/_blob/fea3d875b3ba03e8355dcae7643e75e3") format('truetype'); }
+  .od { font-family: 'Prompt', var(--font-anthropic-sans); font-weight: 400; display: grid; gap: var(--cds-gap-lg); }
+  .od-head h1 { font-family: 'Prompt', var(--font-anthropic-sans); font-weight: 700; font-size: var(--cds-font-size-title); margin: 0; }
+  .od-takeaway { color: var(--color-fg-muted); margin: var(--cds-gap-xs) 0 0; font-size: var(--cds-font-size-body); }
+  .od-filters { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; }
+  .od-filters label { font-weight: 700; display: flex; flex-direction: column; gap: 2px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .od-filters select, .od-filters button, .od-filters input { font: inherit; font-weight: 400; font-size: var(--cds-font-size-body); color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-sm); min-width: 12rem; }
+  .od-filters input { min-width: 0; }
+  .od-filters button { min-width: 0; align-self: flex-end; cursor: pointer; }
+  .od-kpis { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
+  .od-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+  .od-kpi-label { font-size: var(--cds-font-size-body); font-weight: 700; color: var(--color-fg); }
+  .od-kpi-value { font-family: 'Prompt', var(--font-anthropic-sans); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; margin-top: var(--cds-gap-xs); min-height: 1.3em; }
+  .od-kpi-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: var(--cds-gap-xs); }
+  .od-check { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-lg); align-items: center; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); padding: var(--cds-pad-sm) var(--cds-pad-md); border: 1px dashed var(--color-border-line); border-radius: var(--cds-radius); min-height: 2.25rem; }
+  .od-check b { color: var(--color-fg); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .od-chip { display: inline-flex; gap: 6px; align-items: center; }
+  .od-dot { width: .5rem; height: .5rem; border-radius: 50%; display: inline-block; }
+  .od-grid { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+  .od .od-card h2 { font-size: var(--cds-font-size-heading); font-weight: 700; margin: 0; }
+  .od-card .od-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 2px 0 var(--cds-gap-md); }
+  .od-chart { position: relative; min-height: 260px; }
+  .od-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; display: none; z-index: 2; }
+  .od-tip .od-tip-h { color: var(--cds-text-secondary); }
+  .od-tip .od-tip-v { font-variant-numeric: tabular-nums; }
+  .od-fail { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: inherit; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .od-fail::before { content: ''; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+  .od-empty { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .od svg text { fill: var(--color-fg-muted); font-size: var(--cds-font-size-caption); font-family: 'Prompt', var(--font-anthropic-sans); }
+  #kpi-net { --kpi: #2f80ed; }
+  #kpi-orders { --kpi: #27ae60; }
+  #kpi-aov { --kpi: #f2c94c; }
+  #kpi-cancel { --kpi: #eb5757; }
+  .od-kpis .od-card { background: color-mix(in srgb, var(--kpi) 16%, var(--color-panel)); border-color: color-mix(in srgb, var(--kpi) 45%, var(--color-border-line)); border-left: 4px solid var(--kpi); }
+  .od-chart.od-carrier { min-height: 140px; }
+  .od-table-wrap { overflow-x: auto; margin-top: var(--cds-gap-md); }
+  .od-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .od-table th, .od-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); text-align: left; white-space: nowrap; }
+  .od-table th { font-weight: 700; color: var(--color-fg-muted); }
+  .od-table .num { text-align: right; }
+  .od-table-scroll { max-height: 22rem; overflow-y: auto; }
+  .od-table-scroll thead th { position: sticky; top: 0; background: var(--color-panel); z-index: 1; }
+  .od-table-scroll tfoot td { position: sticky; bottom: 0; background: var(--color-panel); }
+  .od-table tfoot td { font-weight: 700; border-bottom: none; }
+  .od-rp-title { font-size: var(--cds-font-size-heading); font-weight: 700; margin: 0; }
+  .od-rp .od-sub { margin-bottom: var(--cds-gap-md); }
+  .od-rp-grid { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); min-height: 200px; }
+  .od-rp-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); align-content: start; }
+  .od-rp-card.is-top { border-color: var(--rp-accent); border-width: 2px; }
+  .od-rp-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--cds-gap-sm); }
+  .od-rp-name { font-weight: 700; font-size: var(--cds-font-size-body); }
+  .od-rp-total { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--rp-accent); white-space: nowrap; }
+  .od-rp-rank { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-xs); }
+  .od-rp-rank strong { color: var(--rp-accent); font-weight: 700; }
+  .od-rp-list { display: grid; gap: var(--cds-gap-sm); }
+  .od-rp-item { display: grid; grid-template-columns: 1fr; row-gap: 4px; }
+  .od-rp-label { display: flex; align-items: center; gap: 6px; font-size: var(--cds-font-size-body); font-weight: 700; min-width: 0; }
+  .od-rp-label span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .od-rp-mark { width: .5rem; height: .5rem; border-radius: 2px; flex: none; }
+  .od-rp-track { height: 14px; border-radius: 4px; background: color-mix(in srgb, var(--color-fg) 6%, transparent); overflow: hidden; }
+  .od-rp-bar { height: 100%; border-radius: 4px; }
+  .od-rp-val { line-height: 1.4; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .od-tabs { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; border-bottom: 1px solid var(--color-border-line); }
+  .od-tabs [role=tab] { font: inherit; font-weight: 700; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--color-fg-muted); padding: var(--cds-pad-sm) var(--cds-pad-md); cursor: pointer; margin-bottom: -1px; }
+  .od-tabs [role=tab][aria-selected=true] { color: var(--color-fg); border-bottom-color: #2f80ed; }
+  .od-tabs .od-spacer { flex: 1; }
+  .od-exec { font: inherit; font-weight: 700; color: #fff; background: #2f80ed; border: 0; border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-md); cursor: pointer; margin-bottom: var(--cds-gap-xs); }
+  .od-exec[disabled] { opacity: .6; cursor: default; }
+  .od-exec-panel { border-left: 4px solid #2f80ed; }
+  .od-exec-out { white-space: pre-line; line-height: 1.7; font-size: var(--cds-font-size-body); min-height: 1.7em; }
+  .od-exec-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: var(--cds-gap-sm) 0 0; }
+  .od-exec-note.is-bad { color: var(--color-bad); }
+  .od-exec-panel details { margin-top: var(--cds-gap-sm); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .od-exec-panel pre { white-space: pre-wrap; word-break: break-word; font-size: var(--cds-font-size-caption); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-sm); max-height: 18rem; overflow: auto; }
+  .od-page { display: grid; gap: var(--cds-gap-lg); }
+  .od-page[hidden] { display: none; }
+  #mkpi-share { --kpi: #2f80ed; }
+  #mkpi-perday { --kpi: #27ae60; }
+  #mkpi-mmargin { --kpi: #f2c94c; }
+  #mkpi-nmargin { --kpi: #9b51e0; }
+  .od-exec-manual { display: grid; gap: var(--cds-gap-sm); margin-top: var(--cds-gap-sm); }
+  .od-exec-manual[hidden] { display: none; }
+  .od-exec-manual textarea { font: inherit; font-size: var(--cds-font-size-caption); color: var(--color-fg); background: var(--color-bg); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-sm); width: 100%; box-sizing: border-box; resize: vertical; }
+  .od-exec-manual .od-row { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; }
+  .od-exec-manual button { font: inherit; font-weight: 700; color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-md); cursor: pointer; }
+  .od-exec-step { font-size: var(--cds-font-size-caption); font-weight: 700; margin: 0; }
+  .od-report-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--cds-gap-sm); }
+  .od-report-head h2 { margin: 0; }
+  .od-pdf { font: inherit; font-weight: 700; color: #fff; background: #185fa5; border: 0; border-radius: var(--cds-radius); padding: var(--cds-pad-xs) var(--cds-pad-md); cursor: pointer; }
+  .od-pdf[disabled] { opacity: .6; cursor: default; }
+  .od-report { display: grid; gap: var(--cds-gap-md); max-width: 52rem; }
+  .od-report { text-align: left; }
+  .od-report .od-report-title { font-size: var(--cds-font-size-title); font-weight: 700; margin: 0; color: #0c447c; }
+  .od-report h3 { font-size: var(--cds-font-size-body); font-weight: 700; margin: 0 0 4px; color: #185fa5; border-left: 4px solid #185fa5; padding-left: var(--cds-pad-sm); }
+  .od-report .od-report-count { font-weight: 400; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .od-report p { margin: 0; line-height: 1.75; }
+  .od-report ul { margin: 0; padding-left: 1.4em; display: grid; gap: 6px; line-height: 1.7; }
+  .od-report li::marker { color: #185fa5; }
+  .od-report li b { color: #0c447c; }
+  .od-report-kpis { display: grid; gap: var(--cds-gap-sm); grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+  .od-report-kpis div { background: color-mix(in srgb, #2f80ed 10%, var(--color-panel)); border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); }
+  .od-report-kpis span { display: block; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .od-report-kpis b { font-variant-numeric: tabular-nums; }
+  .od-upload { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .od-upload-item { display: grid; gap: 6px; align-content: start; }
+  .od-up-btn { font: inherit; font-weight: 700; text-align: left; border-radius: var(--cds-radius); padding: var(--cds-pad-sm) var(--cds-pad-md); cursor: pointer; width: 100%; }
+  .od-up-primary { background: var(--color-fg); color: var(--color-bg); border: 1px solid var(--color-fg); }
+  .od-up-secondary { background: var(--color-panel); color: var(--color-fg); border: 1px solid var(--color-border-line); }
+  .od-up-btn[disabled] { opacity: .6; cursor: default; }
+  .od-up-cap, .od-up-msg { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .od-up-msg.is-bad { color: var(--color-bad); }
+  .od-up-msg.is-ok { color: var(--color-ok); }
+  .od-up-confirm { font-size: var(--cds-font-size-caption); display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); align-items: center; padding: var(--cds-pad-sm); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); }
+  .od-up-confirm[hidden] { display: none; }
+  .od-up-confirm button { font: inherit; font-weight: 700; border-radius: var(--cds-radius); padding: 2px var(--cds-pad-sm); cursor: pointer; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); }
+  .od-up-confirm button.od-yes { background: #185fa5; border-color: #185fa5; color: #fff; }
+  .od-def { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="od">
+  <header class="od-head" id="overview">
+    <h1>แดชบอร์ดยอด บ้านสบาย ช๊อป</h1>
+    <p class="od-takeaway" data-source="cube"><span class="od-take dash-skeleton">—</span></p>
+  </header>
+
+  <section class="od-upload" id="data-files" aria-label="ไฟล์ข้อมูล" data-source="cube products">
+    <div class="od-upload-item" data-ds="orders">
+      <button type="button" class="od-up-btn od-up-primary" hidden>อัปโหลดไฟล์ใหม่</button>
+      <input type="file" accept=".csv,text/csv" hidden>
+      <div class="od-up-cap">ไฟล์: <span class="od-up-name">orders.csv</span><span class="od-up-meta"></span></div>
+      <div class="od-up-confirm" hidden></div>
+      <div class="od-up-msg"></div>
+    </div>
+    <div class="od-upload-item" data-ds="products">
+      <button type="button" class="od-up-btn od-up-secondary" hidden>อัปโหลด products.csv ใหม่</button>
+      <input type="file" accept=".csv,text/csv" hidden>
+      <div class="od-up-cap">ไฟล์: <span class="od-up-name">products.csv</span><span class="od-up-meta"></span></div>
+      <div class="od-up-confirm" hidden></div>
+      <div class="od-up-msg"></div>
+    </div>
+  </section>
+
+  <div class="od-filters" id="filters" data-source="cube">
+    <label>ภูมิภาค<select class="od-region" aria-label="ภูมิภาค"></select></label>
+    <label>หมวดสินค้า<select class="od-category" aria-label="หมวดสินค้า"></select></label>
+    <label>ช่องทาง<select class="od-channel" aria-label="ช่องทาง"></select></label>
+    <label>ตั้งแต่วันที่<input class="od-from" type="date" aria-label="ตั้งแต่วันที่"></label>
+    <label>ถึงวันที่<input class="od-to" type="date" aria-label="ถึงวันที่"></label>
+    <button class="od-reset" type="button">ล้างตัวกรอง</button>
+  </div>
+
+  <div class="od-tabs" role="tablist" aria-label="หน้า">
+    <button role="tab" type="button" data-tab="overview-page" aria-selected="true">ภาพรวม</button>
+    <button role="tab" type="button" data-tab="mega-page" aria-selected="false">วันเมกะเซล</button>
+    <button role="tab" type="button" data-tab="exec-page" aria-selected="false">บทสรุปผู้บริหาร</button>
+  </div>
+
+  <div class="od-page" id="overview-page" role="tabpanel">
+
+  <section class="od-kpis" id="kpis" data-source="cube">
+    <div class="od-card" id="kpi-net">
+      <div class="od-kpi-label">ยอดขายสุทธิ</div>
+      <div class="od-kpi-value dash-skeleton" data-k="net">—</div>
+      <div class="od-kpi-note">qty × unit_price × (1 − discount_pct/100) เฉพาะ “จัดส่งสำเร็จ” ไม่รวมค่าส่ง</div>
+    </div>
+    <div class="od-card" id="kpi-orders">
+      <div class="od-kpi-label">คำสั่งซื้อสำเร็จ</div>
+      <div class="od-kpi-value dash-skeleton" data-k="orders">—</div>
+      <div class="od-kpi-note">จำนวนคำสั่งซื้อสถานะ “จัดส่งสำเร็จ”</div>
+    </div>
+    <div class="od-card" id="kpi-aov">
+      <div class="od-kpi-label">AOV (ยอดเฉลี่ยต่อคำสั่งซื้อ)</div>
+      <div class="od-kpi-value dash-skeleton" data-k="aov">—</div>
+      <div class="od-kpi-note">ยอดขายสุทธิ ÷ คำสั่งซื้อสำเร็จ</div>
+    </div>
+    <div class="od-card" id="kpi-cancel">
+      <div class="od-kpi-label">อัตรายกเลิก</div>
+      <div class="od-kpi-value dash-skeleton" data-k="cancel">—</div>
+      <div class="od-kpi-note">คำสั่งซื้อ “ยกเลิก” ÷ คำสั่งซื้อทั้งหมด</div>
+    </div>
+  </section>
+
+  <div class="od-check" id="row-check" data-source="cube"><span class="dash-skeleton">—</span></div>
+
+  <section class="od-grid">
+    <div class="od-card" id="monthly">
+      <h2>ยอดขายสุทธิรายเดือน</h2>
+      <p class="od-sub">เรียงตามเวลา · เฉพาะจัดส่งสำเร็จ · ชี้เมาส์ที่จุดเพื่อดูรายละเอียด</p>
+      <div class="od-chart od-line" data-source="cube"></div>
+    </div>
+    <div class="od-card" id="by-channel">
+      <h2>ยอดขายสุทธิตามช่องทาง</h2>
+      <p class="od-sub">เรียงจากมากไปน้อย · เฉพาะจัดส่งสำเร็จ · ยอดขาย (ร้อยละ) · คำสั่งซื้อ (ร้อยละ)</p>
+      <div class="od-chart od-bars" data-source="cube"></div>
+    </div>
+  </section>
+
+  <section class="od-grid">
+    <div class="od-card" id="by-carrier">
+      <h2>ยอดขายสุทธิตามบริษัทขนส่ง</h2>
+      <p class="od-sub">เรียงจากมากไปน้อย · เฉพาะจัดส่งสำเร็จ · ยอดขาย (ร้อยละ) · คำสั่งซื้อ (ร้อยละ) · วันส่งเฉลี่ย</p>
+      <div class="od-chart od-carrier" data-source="by_carrier"></div>
+    </div>
+    <div class="od-card" id="by-province">
+      <h2>ยอดขายสุทธิแยกตามจังหวัด</h2>
+      <p class="od-sub">เรียงจากมากไปน้อย · เฉพาะจัดส่งสำเร็จ · ยอดขาย ร้อยละยอดขาย คำสั่งซื้อ และร้อยละคำสั่งซื้อ อยู่ใต้แต่ละแท่ง</p>
+      <div class="od-chart od-province" data-source="by_province"></div>
+    </div>
+    <div class="od-card" id="by-region">
+      <h2>ยอดขายสุทธิแยกตามภูมิภาค</h2>
+      <p class="od-sub">เรียงจากมากไปน้อย · เฉพาะจัดส่งสำเร็จ · ยอดขาย (ร้อยละ) · คำสั่งซื้อ (ร้อยละ)</p>
+      <div class="od-chart od-region-bars" data-source="cube"></div>
+    </div>
+  </section>
+
+  <section class="od-rp" id="top-province-by-region">
+    <h2 class="od-rp-title">จังหวัดที่ขายได้มากที่สุดในแต่ละภูมิภาค</h2>
+    <p class="od-sub">แบ่ง 6 ภูมิภาค · ยอดขายสุทธิของทุกจังหวัดในภูมิภาค เรียงภูมิภาคจากยอดรวมมากไปน้อย · เฉพาะจัดส่งสำเร็จ · ใช้ตัวกรองหมวดสินค้า (ภูมิภาคที่เลือกจะมีกรอบเน้น)</p>
+    <div class="od-rp-grid" data-source="by_province"></div>
+  </section>
+  </div>
+
+  <div class="od-page" id="mega-page" role="tabpanel" hidden>
+    <section class="od-kpis" id="mega-kpis" data-source="mega">
+      <div class="od-card" id="mkpi-share">
+        <div class="od-kpi-label">สัดส่วนยอดขายวันเมกะเซล</div>
+        <div class="od-kpi-value dash-skeleton" data-m="share">—</div>
+        <div class="od-kpi-note" data-m="share-note">ยอดขายสุทธิ 6 วันเมกะเซล ÷ ยอดขายสุทธิทั้งหมด</div>
+      </div>
+      <div class="od-card" id="mkpi-perday">
+        <div class="od-kpi-label">ยอดขายเฉลี่ยต่อวัน (วันเมกะเซล)</div>
+        <div class="od-kpi-value dash-skeleton" data-m="perday">—</div>
+        <div class="od-kpi-note" data-m="perday-note">เทียบวันปกติ</div>
+      </div>
+      <div class="od-card" id="mkpi-mmargin">
+        <div class="od-kpi-label">% กำไรขั้นต้น วันเมกะเซล</div>
+        <div class="od-kpi-value dash-skeleton" data-m="mmargin">—</div>
+        <div class="od-kpi-note" data-m="mmargin-note">(ยอดขายสุทธิ − ต้นทุน) ÷ ยอดขายสุทธิ</div>
+      </div>
+      <div class="od-card" id="mkpi-nmargin">
+        <div class="od-kpi-label">% กำไรขั้นต้น วันปกติ</div>
+        <div class="od-kpi-value dash-skeleton" data-m="nmargin">—</div>
+        <div class="od-kpi-note" data-m="nmargin-note">(ยอดขายสุทธิ − ต้นทุน) ÷ ยอดขายสุทธิ</div>
+      </div>
+    </section>
+
+    <section class="od-grid">
+      <div class="od-card" id="mega-sales">
+        <h2>ยอดขายสุทธิ: วันเมกะเซล เทียบวันปกติ</h2>
+        <p class="od-sub">วันเมกะเซลแสดงยอดของวันนั้น · วันปกติแสดงค่าเฉลี่ยต่อวัน · เฉพาะจัดส่งสำเร็จ · ชี้เมาส์ที่แท่งเพื่อดูรายละเอียด</p>
+        <div class="od-chart od-mega-sales" data-source="mega"></div>
+      </div>
+      <div class="od-card" id="mega-margin">
+        <h2>% กำไรขั้นต้น: วันเมกะเซล เทียบวันปกติ</h2>
+        <p class="od-sub">กำไรขั้นต้น = ยอดขายสุทธิ − qty × unit_cost · เฉพาะจัดส่งสำเร็จ · ชี้เมาส์ที่แท่งเพื่อดูรายละเอียด</p>
+        <div class="od-chart od-mega-margin" data-source="mega"></div>
+      </div>
+    </section>
+    <p class="od-def">วันเมกะเซล = 10.10, 11.11, 12.12, 3.3, 6.6, 9.9 · วันปกติ = วันอื่นทั้งหมดในข้อมูล · ต้นทุน (unit_cost) จาก products.csv จับคู่ด้วย product_id</p>
+  </div>
+
+  <div class="od-page" id="exec-page" role="tabpanel" hidden>
+    <section class="od-card od-report-card" id="exec-report" data-source="cube">
+      <div class="od-report-head">
+        <div>
+          <h2>รายงานสำหรับดาวน์โหลด</h2>
+          <p class="od-sub">สร้างจากตัวเลขสรุปตามตัวกรองปัจจุบัน · <span class="od-report-words">—</span></p>
+        </div>
+        <button class="od-pdf" type="button" disabled>ดาวน์โหลด PDF</button>
+      </div>
+      <p class="od-pdf-note od-exec-note"></p>
+      <div class="od-report"></div>
+    </section>
+    <section class="od-card od-exec-panel" id="exec-summary">
+      <div class="od-report-head">
+        <div>
+          <h2>สรุป 5 บรรทัดโดย Claude</h2>
+          <p class="od-sub">เขียนจากตัวเลขสรุปตามตัวกรองปัจจุบันเท่านั้น (ไม่เกิน 30 ค่า) ไม่ส่งข้อมูลรายคำสั่งซื้อ</p>
+        </div>
+        <button class="od-exec" type="button">สรุปให้ผู้บริหาร</button>
+      </div>
+      <div class="od-exec-out"></div>
+      <p class="od-exec-note"></p>
+      <div class="od-exec-manual" hidden>
+        <p class="od-exec-step">1) คัดลอกคำสั่งด้านล่าง แล้ววางในแชต Claude</p>
+        <textarea class="od-exec-prompt" rows="6" readonly aria-label="คำสั่งสำหรับ Claude"></textarea>
+        <div class="od-row"><button type="button" class="od-exec-copy">คัดลอกคำสั่ง</button><span class="od-exec-copied od-exec-note"></span></div>
+        <p class="od-exec-step">2) วางบทสรุปที่ Claude ตอบกลับ เพื่อตรวจว่าตัวเลขทุกตัวมาจากข้อมูลที่ส่ง</p>
+        <textarea class="od-exec-paste" rows="6" aria-label="บทสรุปจาก Claude"></textarea>
+        <div class="od-row"><button type="button" class="od-exec-verify">ตรวจตัวเลข</button></div>
+      </div>
+      <details><summary>ข้อมูลที่ส่งให้ Claude (<span class="od-exec-count">0</span> ค่า)</summary><pre class="od-exec-json"></pre></details>
+    </section>
+  </div>
+</div>
+
+<script>
+  dash.calc('cube', {
+    inputs: ['orders'],
+    title: 'Orders summarised',
+    description: 'จำนวนคำสั่งซื้อและยอดขายสุทธิ (qty × unit_price × (1 − discount_pct/100)) แยกตามภูมิภาค หมวด วันที่ ช่องทาง และสถานะ',
+    fn: (orders) => {
+      const groups = new Map();
+      for (const raw of orders) {
+        const r = {};
+        for (const k in raw) r[k.replace(/^﻿/, '').trim()] = typeof raw[k] === 'string' ? raw[k].trim() : raw[k];
+        const qty = Number(r.qty), price = Number(r.unit_price), disc = Number(r.discount_pct || 0);
+        const date = String(r.order_datetime || '').slice(0, 10);
+        const valid = Number.isFinite(qty) && Number.isFinite(price) && Number.isFinite(disc) && /^\d{4}-\d{2}-\d{2}$/.test(date);
+        const key = [r.region, r.category, date, r.channel, r.status, valid].join('|');
+        let g = groups.get(key);
+        if (!g) groups.set(key, g = { region: r.region, category: r.category, date, month: date.slice(0, 7), channel: r.channel, status: r.status, valid, orders: 0, net: 0 });
+        g.orders += 1;
+        if (valid) g.net += qty * price * (1 - disc / 100);
+      }
+      return [...groups.values()];
+    },
+  });
+
+  dash.calc('by_carrier', {
+    inputs: ['orders'],
+    title: 'Net sales by carrier',
+    description: 'ยอดขายสุทธิ จำนวนคำสั่งซื้อ และวันจัดส่งรวม (ship_days) ของคำสั่งซื้อจัดส่งสำเร็จ แยกตามบริษัทขนส่ง ภูมิภาค หมวด ช่องทาง และวันที่',
+    fn: (orders) => {
+      const groups = new Map();
+      for (const raw of orders) {
+        const r = {};
+        for (const k in raw) r[k.replace(/^﻿/, '').trim()] = typeof raw[k] === 'string' ? raw[k].trim() : raw[k];
+        const qty = Number(r.qty), price = Number(r.unit_price), disc = Number(r.discount_pct || 0);
+        if (r.status !== 'จัดส่งสำเร็จ' || !Number.isFinite(qty) || !Number.isFinite(price) || !Number.isFinite(disc)) continue;
+        const date = String(r.order_datetime || '').slice(0, 10);
+        const key = [r.region, r.category, r.channel, date, r.carrier].join('|');
+        let g = groups.get(key);
+        if (!g) groups.set(key, g = { region: r.region, category: r.category, channel: r.channel, date, carrier: r.carrier, orders: 0, net: 0, shipDays: 0, shipOrders: 0 });
+        g.orders += 1;
+        g.net += qty * price * (1 - disc / 100);
+        const days = Number(r.ship_days);
+        if (r.ship_days !== '' && r.ship_days != null && Number.isFinite(days)) { g.shipDays += days; g.shipOrders += 1; }
+      }
+      return [...groups.values()];
+    },
+  });
+
+  dash.calc('by_province', {
+    inputs: ['orders'],
+    title: 'Net sales by province',
+    description: 'ยอดขายสุทธิของคำสั่งซื้อจัดส่งสำเร็จ แยกตามจังหวัด ภูมิภาค หมวด ช่องทาง และวันที่',
+    fn: (orders) => {
+      const groups = new Map();
+      for (const raw of orders) {
+        const r = {};
+        for (const k in raw) r[k.replace(/^﻿/, '').trim()] = typeof raw[k] === 'string' ? raw[k].trim() : raw[k];
+        const qty = Number(r.qty), price = Number(r.unit_price), disc = Number(r.discount_pct || 0);
+        if (r.status !== 'จัดส่งสำเร็จ' || !Number.isFinite(qty) || !Number.isFinite(price) || !Number.isFinite(disc)) continue;
+        const date = String(r.order_datetime || '').slice(0, 10);
+        const key = [r.region, r.category, r.channel, date, r.province].join('|');
+        let g = groups.get(key);
+        if (!g) groups.set(key, g = { region: r.region, category: r.category, channel: r.channel, date, province: r.province, orders: 0, net: 0 });
+        g.orders += 1;
+        g.net += qty * price * (1 - disc / 100);
+      }
+      return [...groups.values()];
+    },
+  });
+
+  dash.calc('mega', {
+    inputs: ['orders', 'products'],
+    title: 'Mega-sale vs normal days',
+    description: 'ยอดขายสุทธิ ต้นทุน (qty × unit_cost จาก products) และจำนวนคำสั่งซื้อจัดส่งสำเร็จ แยกวันเมกะเซล (10.10 11.11 12.12 3.3 6.6 9.9) กับวันปกติ ตามภูมิภาค หมวด ช่องทาง และวันที่',
+    fn: (orders, products) => {
+      const clean = (raw) => {
+        const r = {};
+        for (const k in raw) r[k.replace(/^\uFEFF/, '').trim()] = typeof raw[k] === 'string' ? raw[k].trim() : raw[k];
+        return r;
+      };
+      const cost = new Map(products.map(clean).map((p) => [p.product_id, Number(p.unit_cost)]));
+      const MEGA = ['10-10', '11-11', '12-12', '03-03', '06-06', '09-09'];
+      const groups = new Map();
+      for (const raw of orders) {
+        const r = clean(raw);
+        const date = String(r.order_datetime || '').slice(0, 10);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+        const isMega = MEGA.includes(date.slice(5));
+        if (r.status !== 'จัดส่งสำเร็จ') continue;
+        const qty = Number(r.qty), price = Number(r.unit_price), disc = Number(r.discount_pct || 0), unitCost = cost.get(r.product_id);
+        if (![qty, price, disc, unitCost].every(Number.isFinite)) continue;
+        const key = [r.region, r.category, r.channel, date].join('|');
+        let g = groups.get(key);
+        if (!g) groups.set(key, g = { region: r.region, category: r.category, channel: r.channel, date, kind: isMega ? 'mega' : 'normal', net: 0, cost: 0, orders: 0 });
+        g.net += qty * price * (1 - disc / 100);
+        g.cost += qty * unitCost;
+        g.orders += 1;
+      }
+      return [...groups.values()];
+    },
+  });
+</script>
+
+<script>
+  const SUCCESS = 'จัดส่งสำเร็จ', CANCEL = 'ยกเลิก';
+  const root = document.querySelector('.od');
+  const regionSel = root.querySelector('.od-region');
+  const catSel = root.querySelector('.od-category');
+  const nf0 = new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 });
+  const nf2 = new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const baht = (v) => '฿' + nf0.format(v);
+  const baht2 = (v) => '฿' + nf2.format(v);
+  const count = (v) => nf0.format(v);
+  const pct = (v) => new Intl.NumberFormat('th-TH', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+  const monthDate = (m) => new Date(m + '-01T00:00:00Z');
+  const monthShort = (m) => new Intl.DateTimeFormat('th-TH', { month: 'short', timeZone: 'UTC' }).format(monthDate(m));
+  const yearBE = (m) => new Intl.DateTimeFormat('th-TH', { year: 'numeric', timeZone: 'UTC' }).format(monthDate(m));
+  const monthLabel = (m) => new Intl.DateTimeFormat('th-TH', { month: 'short', year: '2-digit', timeZone: 'UTC' }).format(new Date(m + '-01T00:00:00Z'));
+  const statusColor = (s) => s === SUCCESS ? 'var(--color-ok)' : s === CANCEL ? 'var(--color-bad)' : 'var(--color-warn)';
+
+  regionSel.addEventListener('change', () => dash.setParams({ region: regionSel.value || null }));
+  catSel.addEventListener('change', () => dash.setParams({ category: catSel.value || null }));
+  const chanSel = root.querySelector('.od-channel');
+  chanSel.addEventListener('change', () => dash.setParams({ channel: chanSel.value || null }));
+  const fromIn = root.querySelector('.od-from'), toIn = root.querySelector('.od-to');
+  const showDates = () => {
+    if (fromIn !== document.activeElement) fromIn.value = dash.params().from ?? '';
+    if (toIn !== document.activeElement) toIn.value = dash.params().to ?? '';
+  };
+  for (const [input, name] of [[fromIn, 'from'], [toIn, 'to']]) {
+    input.addEventListener('change', () => {
+      if (!input.value) dash.setParams({ [name]: null });
+      else if (input.validity.valid && (!input.min || input.value >= input.min) && (!input.max || input.value <= input.max)) dash.setParams({ [name]: input.value });
+    });
+    input.addEventListener('blur', () => { input.value = dash.params()[name] ?? ''; });
+  }
+  const thDate = (d) => new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(d + 'T00:00:00Z'));
+  root.querySelector('.od-reset').addEventListener('click', () => dash.resetParams());
+
+  const fillSelect = (sel, all, values, current) => {
+    sel.replaceChildren(new Option(all, ''), ...values.map((v) => new Option(v, v)));
+    sel.value = current && values.includes(current) ? current : '';
+  };
+
+  const setSkeleton = (on) => root.querySelectorAll('[data-k], .od-take').forEach((el) => el.classList.toggle('dash-skeleton', on));
+
+  const failLine = (el) => { const d = document.createElement('div'); d.className = 'od-fail'; d.textContent = 'Failed to load'; el.replaceChildren(d); };
+
+  function tipAt(box, tip, html, x, y) {
+    tip.replaceChildren(...html);
+    tip.style.display = 'block';
+    const bw = box.clientWidth, tw = tip.offsetWidth;
+    tip.style.left = Math.max(0, Math.min(bw - tw, x - tw / 2)) + 'px';
+    tip.style.top = Math.max(0, y - tip.offsetHeight - 10) + 'px';
+  }
+  function tipLines(head, value) {
+    const h = document.createElement('div'); h.className = 'od-tip-h'; h.textContent = head;
+    const v = document.createElement('div'); v.className = 'od-tip-v'; v.textContent = value;
+    return [h, v];
+  }
+
+  function drawLine(el, series) {
+    el.replaceChildren();
+    if (!series.length) { const p = document.createElement('div'); p.className = 'od-empty'; p.textContent = 'ไม่มีคำสั่งซื้อสำเร็จตามตัวกรองนี้'; el.append(p); return; }
+    const W = el.clientWidth || 400, H = 260, top = 16, bottom = 44, right = 16;
+    const y = d3.scaleLinear([0, d3.max(series, (d) => d.net) || 1], [H - bottom, top]).nice();
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const ticks = y.ticks(5);
+    const probe = svg.append('g');
+    const widest = d3.max(ticks, (t) => probe.append('text').text(baht(t)).node().getComputedTextLength()) || 40;
+    probe.remove();
+    const left = widest + 10;
+    const x = d3.scalePoint(series.map((d) => d.month), [left + 8, W - right - 8]);
+    svg.append('g').selectAll('line').data(ticks).join('line')
+      .attr('x1', left).attr('x2', W - right).attr('y1', y).attr('y2', y)
+      .attr('stroke', 'var(--cds-chart-grid)').attr('stroke-width', 1);
+    svg.append('g').selectAll('text').data(ticks).join('text')
+      .attr('x', left - 6).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(baht);
+    const step = Math.max(1, Math.ceil(series.length / Math.max(1, Math.floor((W - left) / 40))));
+    const shown = series.filter((d, i) => i % step === 0);
+    svg.append('g').selectAll('text').data(shown).join('text')
+      .attr('x', (d) => x(d.month)).attr('y', H - bottom + 16).attr('text-anchor', 'middle').text((d) => monthShort(d.month));
+    svg.append('g').selectAll('text').data(shown.filter((d, i) => i === 0 || yearBE(d.month) !== yearBE(shown[i - 1].month))).join('text')
+      .attr('x', (d) => x(d.month)).attr('y', H - 6).attr('text-anchor', 'middle')
+      .style('font-weight', 700).text((d) => yearBE(d.month));
+    svg.append('line').attr('x1', left).attr('x2', W - right).attr('y1', H - bottom).attr('y2', H - bottom).attr('stroke', 'var(--cds-chart-axis)');
+    svg.append('path').datum(series)
+      .attr('d', d3.line((d) => x(d.month), (d) => y(d.net)))
+      .attr('fill', 'none').attr('stroke', dash.colors[0]).attr('stroke-width', 2)
+      .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+    const dot = svg.append('circle').attr('r', 4).attr('fill', dash.colors[0]).style('display', 'none');
+    const tip = document.createElement('div'); tip.className = 'od-tip'; el.append(tip);
+    const half = (x.step() || W) / 2;
+    svg.append('g').selectAll('rect').data(series).join('rect')
+      .attr('x', (d) => x(d.month) - half).attr('width', half * 2).attr('y', top).attr('height', H - top - bottom)
+      .attr('fill', 'transparent')
+      .on('mousemove', (event, d) => {
+        dot.style('display', null).attr('cx', x(d.month)).attr('cy', y(d.net));
+        const s = W / el.clientWidth || 1;
+        const totNet = d3.sum(series, (m) => m.net), totOrders = d3.sum(series, (m) => m.orders);
+        const lines = tipLines(monthShort(d.month) + ' ' + yearBE(d.month), `ยอดขายสุทธิ ${baht(d.net)}`);
+        for (const t of [`ร้อยละยอดขาย ${pct(totNet ? d.net / totNet : 0)}`, `คำสั่งซื้อ ${count(d.orders)}`, `ร้อยละคำสั่งซื้อ ${pct(totOrders ? d.orders / totOrders : 0)}`]) {
+          const v = document.createElement('div'); v.className = 'od-tip-v'; v.textContent = t; lines.push(v);
+        }
+        tipAt(el, tip, lines, x(d.month) / s, y(d.net) / s);
+      })
+      .on('mouseleave', () => { dot.style('display', 'none'); tip.style.display = 'none'; });
+  }
+
+  function drawBars(el, rows, key = 'channel', rowH = 44, withOrders = false, minH = 260) {
+    const valueText = (d) => withOrders ? `${baht(d.net)} · ${count(d.orders)} คำสั่งซื้อ` : baht(d.net);
+    el.replaceChildren();
+    if (!rows.length) { const p = document.createElement('div'); p.className = 'od-empty'; p.textContent = 'ไม่มีคำสั่งซื้อสำเร็จตามตัวกรองนี้'; el.append(p); return; }
+    const W = el.clientWidth || 400, top = 4, H = Math.max(minH, top + rows.length * rowH);
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const probe = svg.append('g');
+    const labelW = d3.max(rows, (d) => probe.append('text').text(d[key]).node().getComputedTextLength()) || 40;
+    const valueW = d3.max(rows, (d) => probe.append('text').text(valueText(d)).node().getComputedTextLength()) || 40;
+    probe.remove();
+    const left = labelW + 12, right = valueW + 12;
+    const x = d3.scaleLinear([0, d3.max(rows, (d) => d.net) || 1], [left, Math.max(left + 20, W - right)]);
+    const y = d3.scaleBand(rows.map((d) => d[key]), [top, top + rows.length * rowH]).padding(0.3);
+    const tip = document.createElement('div'); tip.className = 'od-tip'; el.append(tip);
+    const g = svg.append('g').selectAll('g').data(rows).join('g');
+    g.append('text').attr('x', left - 8).attr('y', (d) => y(d[key]) + y.bandwidth() / 2).attr('dy', '0.32em').attr('text-anchor', 'end').text((d) => d[key]);
+    g.append('rect').attr('x', left).attr('y', (d) => y(d[key])).attr('height', Math.min(32, y.bandwidth()))
+      .attr('width', (d) => Math.max(1, x(d.net) - left)).attr('rx', 4).attr('fill', dash.colors[0])
+      .on('mousemove', (event, d) => {
+        const s = W / el.clientWidth || 1;
+        tipAt(el, tip, tipLines(d[key], `${baht(d.net)} · ${count(d.orders)} คำสั่งซื้อ`), x(d.net) / s, y(d[key]) / s);
+      })
+      .on('mouseleave', () => { tip.style.display = 'none'; });
+    g.append('text').attr('x', (d) => x(d.net) + 6).attr('y', (d) => y(d[key]) + y.bandwidth() / 2).attr('dy', '0.32em')
+      .style('font-variant-numeric', 'tabular-nums').text(valueText);
+  }
+
+  const days = (v) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+  function fillDetailTable(table, agg, key, withShip, label = (v) => v) {
+    const totNet = d3.sum(agg, (d) => d.net), totOrders = d3.sum(agg, (d) => d.orders);
+    const totShip = d3.sum(agg, (d) => d.shipDays), totShipN = d3.sum(agg, (d) => d.shipOrders);
+    const row = (cells, tag = 'td') => {
+      const tr = document.createElement('tr');
+      cells.forEach((c, i) => { const td = document.createElement(tag); td.textContent = c; if (i) td.className = 'num'; tr.append(td); });
+      return tr;
+    };
+    const line = (name, d) => {
+      const cells = [name, baht(d.net), totNet ? pct(d.net / totNet) : '—', count(d.orders), totOrders ? pct(d.orders / totOrders) : '—'];
+      if (withShip) cells.push(d.shipOrders ? days(d.shipDays / d.shipOrders) : '—');
+      return cells;
+    };
+    table.tBodies[0].replaceChildren(...agg.map((d) => row(line(label(d[key]), d))));
+    table.tFoot.replaceChildren(agg.length ? row(line('รวม', { net: totNet, orders: totOrders, shipDays: totShip, shipOrders: totShipN })) : '');
+  }
+
+  function drawProvinceList(box, agg, key = 'province', unit = 'จังหวัด', extra = () => '') {
+    const accent = dash.colors[0];
+    const muted = `color-mix(in srgb, ${accent} 45%, var(--color-panel))`;
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    if (!agg.length) { box.replaceChildren(el('div', 'od-empty', 'ไม่มีคำสั่งซื้อสำเร็จตามตัวกรองนี้')); return; }
+    const list = el('div', 'od-rp-list');
+    list.style.setProperty('--rp-accent', accent);
+    const head = el('div', 'od-rp-head');
+    head.append(el('span', 'od-rp-name', `${count(agg.length)} ${unit}`), el('span', 'od-rp-total', baht(d3.sum(agg, (p) => p.net))));
+    const rank = el('div', 'od-rp-rank', 'อันดับ 1 ');
+    rank.append(el('strong', null, agg[0][key]));
+    list.append(head, rank);
+    const max = agg[0].net || 1;
+    const totNet = d3.sum(agg, (p) => p.net), totOrders = d3.sum(agg, (p) => p.orders);
+    agg.forEach((p, i) => {
+      const item = el('div', 'od-rp-item');
+      const label = el('div', 'od-rp-label');
+      const mark = el('span', 'od-rp-mark'); mark.style.background = i === 0 ? accent : muted;
+      label.append(mark, el('span', null, `${i + 1}. ${p[key]}`));
+      const track = el('div', 'od-rp-track');
+      const bar = el('div', 'od-rp-bar'); bar.style.width = Math.max(1, (p.net / max) * 100) + '%'; bar.style.background = i === 0 ? accent : muted;
+      track.append(bar);
+      item.append(label, track, el('div', 'od-rp-val', `${baht(p.net)} (${pct(totNet ? p.net / totNet : 0)}) · ${count(p.orders)} คำสั่งซื้อ (${pct(totOrders ? p.orders / totOrders : 0)})` + extra(p)));
+      list.append(item);
+    });
+    box.replaceChildren(list);
+  }
+
+  function drawRegionProvinces(grid, rows, picked) {
+    const accent = dash.colors[0];
+    const muted = `color-mix(in srgb, ${accent} 45%, var(--color-panel))`;
+    const regions = d3.rollups(rows, (v) => d3.rollups(v, (p) => ({ net: d3.sum(p, (r) => r.net), orders: d3.sum(p, (r) => r.orders) }), (r) => r.province)
+      .map(([province, x]) => ({ province, ...x })).sort((a, b) => b.net - a.net), (r) => r.region)
+      .map(([region, provinces]) => ({ region, provinces, net: d3.sum(provinces, (p) => p.net) }))
+      .sort((a, b) => b.net - a.net);
+    if (!regions.length) {
+      const p = document.createElement('div'); p.className = 'od-empty'; p.textContent = 'ไม่มีคำสั่งซื้อสำเร็จตามตัวกรองนี้';
+      grid.replaceChildren(p); return;
+    }
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    grid.replaceChildren(...regions.map((g, gi) => {
+      const card = el('div', 'od-rp-card' + ((picked ? g.region === picked : gi === 0) ? ' is-top' : ''));
+      card.style.setProperty('--rp-accent', accent);
+      const head = el('div', 'od-rp-head');
+      head.append(el('span', 'od-rp-name', g.region), el('span', 'od-rp-total', baht(g.net)));
+      const rank = el('div', 'od-rp-rank', 'อันดับ 1 ');
+      rank.append(el('strong', null, g.provinces[0].province));
+      card.append(head, rank);
+      const max = g.provinces[0].net || 1;
+      g.provinces.forEach((p, i) => {
+        const item = el('div', 'od-rp-item');
+        const label = el('div', 'od-rp-label');
+        const mark = el('span', 'od-rp-mark'); mark.style.background = i === 0 ? accent : muted;
+        label.append(mark, el('span', null, p.province));
+        const track = el('div', 'od-rp-track');
+        const bar = el('div', 'od-rp-bar'); bar.style.width = Math.max(1, (p.net / max) * 100) + '%'; bar.style.background = i === 0 ? accent : muted;
+        track.append(bar);
+        item.append(label, track, el('div', 'od-rp-val', `${baht(p.net)} · ${count(p.orders)} คำสั่งซื้อ`));
+        card.append(item);
+      });
+      return card;
+    }));
+  }
+
+  // Tabs
+  const tabs = [...root.querySelectorAll('.od-tabs [role=tab]')];
+  const showTab = (id, link = true) => {
+    for (const t of tabs) {
+      const on = t.dataset.tab === id;
+      t.setAttribute('aria-selected', String(on));
+      root.querySelector('#' + t.dataset.tab).hidden = !on;
+    }
+    if (link) dash.setLink(id);
+    render();
+  };
+  tabs.forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab)));
+
+  function drawSimpleList(box, items) {
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    if (!items.length) { box.replaceChildren(el('div', 'od-empty', 'ไม่มีคำสั่งซื้อสำเร็จตามตัวกรองนี้')); return; }
+    const list = el('div', 'od-rp-list');
+    const max = d3.max(items, (d) => d.value) || 1;
+    for (const d of items) {
+      const item = el('div', 'od-rp-item');
+      const label = el('div', 'od-rp-label');
+      const mark = el('span', 'od-rp-mark'); mark.style.background = d.color;
+      label.append(mark, el('span', null, d.label));
+      const track = el('div', 'od-rp-track');
+      const bar = el('div', 'od-rp-bar'); bar.style.width = Math.max(1, (d.value / max) * 100) + '%'; bar.style.background = d.color;
+      track.append(bar);
+      item.append(label, track, el('div', 'od-rp-val', d.text));
+      list.append(item);
+    }
+    box.replaceChildren(list);
+  }
+  function drawVBars(el, items, tickFmt) {
+    el.replaceChildren();
+    if (!items.length) { const p = document.createElement('div'); p.className = 'od-empty'; p.textContent = 'ไม่มีคำสั่งซื้อสำเร็จตามตัวกรองนี้'; el.append(p); return; }
+    const W = el.clientWidth || 400, H = 280, top = 24, bottom = 40, right = 8;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+    const y = d3.scaleLinear([0, d3.max(items, (d) => d.value) || 1], [H - bottom, top]).nice();
+    const ticks = y.ticks(5);
+    const probe = svg.append('g');
+    const widest = d3.max(ticks, (t) => probe.append('text').text(tickFmt(t)).node().getComputedTextLength()) || 40;
+    probe.remove();
+    const left = widest + 10;
+    const x = d3.scaleBand(items.map((d) => d.short), [left, W - right]).padding(0.3);
+    svg.append('g').selectAll('line').data(ticks).join('line')
+      .attr('x1', left).attr('x2', W - right).attr('y1', y).attr('y2', y)
+      .attr('stroke', 'var(--cds-chart-grid)').attr('stroke-width', 1);
+    svg.append('g').selectAll('text').data(ticks).join('text')
+      .attr('x', left - 6).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(tickFmt);
+    svg.append('line').attr('x1', left).attr('x2', W - right).attr('y1', H - bottom).attr('y2', H - bottom).attr('stroke', 'var(--cds-chart-axis)');
+    const bw = Math.min(48, x.bandwidth());
+    const bx = (d) => x(d.short) + (x.bandwidth() - bw) / 2;
+    const tip = document.createElement('div'); tip.className = 'od-tip'; el.append(tip);
+    const g = svg.append('g').selectAll('g').data(items).join('g');
+    g.append('rect').attr('x', bx).attr('width', bw)
+      .attr('y', (d) => y(d.value)).attr('height', (d) => Math.max(1, H - bottom - y(d.value)))
+      .attr('rx', 4).attr('fill', (d) => d.color)
+      .on('mousemove', (event, d) => {
+        const sc = W / el.clientWidth || 1;
+        tipAt(el, tip, tipLines(d.label, d.text), (x(d.short) + x.bandwidth() / 2) / sc, y(d.value) / sc);
+      })
+      .on('mouseleave', () => { tip.style.display = 'none'; });
+    const narrow = x.bandwidth() < 56;
+    g.append('text').attr('x', (d) => x(d.short) + x.bandwidth() / 2).attr('y', (d) => y(d.value) - 6)
+      .attr('text-anchor', 'middle').style('font-variant-numeric', 'tabular-nums').style('font-weight', 700)
+      .style('fill', 'var(--color-fg)').text((d) => narrow ? '' : d.top);
+    g.append('text').attr('x', (d) => x(d.short) + x.bandwidth() / 2).attr('y', H - bottom + 16)
+      .attr('text-anchor', 'middle').text((d) => d.short);
+    g.append('text').attr('x', (d) => x(d.short) + x.bandwidth() / 2).attr('y', H - 6)
+      .attr('text-anchor', 'middle').text((d) => d.sub || '');
+  }
+  const compactBaht = (v) => '฿' + new Intl.NumberFormat('th-TH', { notation: 'compact', maximumFractionDigits: 1 }).format(v);
+  const megaShort = (d) => `${Number(d.slice(5, 7))}.${Number(d.slice(8, 10))}`;
+  const megaName = (d) => megaShort(d) + ' · ' + new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(d + 'T00:00:00Z'));
+
+  // Executive summary: sends only the summary numbers below, never order rows
+  let latestSummary = null;
+  const execBtn = root.querySelector('.od-exec');
+  const execPanel = root.querySelector('#exec-summary');
+  const execOut = root.querySelector('.od-exec-out');
+  const execNote = root.querySelector('.od-exec-note');
+  const samplePromise = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('sample').catch(() => null) : Promise.resolve(null);
+  const leaves = (v) => v && typeof v === 'object' ? Object.values(v).flatMap(leaves) : [v];
+  const numbersIn = (text) => (String(text).replace(/(\d),(?=\d{3})/g, '$1').match(/\d+(?:\.\d+)?/g) || []).map(Number);
+  const allowedNumbers = (obj) => {
+    const out = new Set();
+    const walk = (v, key) => {
+      if (key) numbersIn(key).forEach((n) => out.add(n));
+      if (v && typeof v === 'object') Object.entries(v).forEach(([k, x]) => walk(x, k));
+      else if (typeof v === 'number') out.add(v);
+      else if (v != null) numbersIn(v).forEach((n) => out.add(n));
+    };
+    walk(obj);
+    return out;
+  };
+  const execMessages = {
+    not_granted: 'ยังไม่ได้อนุญาตให้หน้านี้เรียกใช้ Claude',
+    sampling_disabled: 'บัญชีนี้ใช้ Claude จากหน้านี้ไม่ได้',
+    not_declared: 'หน้านี้ยังไม่ได้รับสิทธิ์เรียกใช้ Claude',
+    capability_disabled: 'หน้านี้ยังไม่ได้รับสิทธิ์เรียกใช้ Claude',
+    rate_limited: 'เรียกใช้บ่อยเกินไป ลองใหม่อีกครั้งภายหลัง',
+    session_expired: 'กรุณาเข้าสู่ระบบใหม่',
+  };
+  const buildPrompt = (payload) => [
+    'คุณเป็นนักวิเคราะห์ที่เขียนสรุปยอดขายให้ผู้บริหารร้าน "บ้านสบาย ช๊อป"',
+    'เขียนบทสรุปภาษาไทย 5 บรรทัดพอดี บรรทัดละ 1 ประเด็นสำคัญ ไม่มีหัวเรื่อง ไม่ใส่เลขลำดับ ไม่ใส่สัญลักษณ์นำหน้าบรรทัด',
+    'กฎสำคัญที่สุด: ตัวเลขทุกตัวในบทสรุปต้องมาจากค่าใน JSON ด้านล่างเท่านั้น เขียนตามค่าใน JSON ตรงตัว (ใส่คอมมาคั่นหลักพันได้)',
+    'ห้ามคำนวณตัวเลขใหม่ ห้ามปัดเศษ ห้ามแปลงเป็น "ล้าน" หรือ "พัน" ห้ามบอกเป็นจำนวนเท่าหรือผลต่างที่ไม่มีใน JSON',
+    'หน่วย: ชื่อที่ลงท้าย _บาท ให้เขียนเป็น ฿ และ _ร้อยละ ให้เขียนเป็น %',
+    'ตอบเฉพาะบทสรุป 5 บรรทัด',
+    '',
+    'JSON:',
+    JSON.stringify(payload),
+  ].join('\n');
+  const checkSummary = (text, payload) => {
+    const lines = String(text).split('\n').map((l) => l.trim()).filter(Boolean);
+    const allowed = allowedNumbers(payload);
+    const extra = [...new Set(numbersIn(lines.join('\n')).filter((n) => !allowed.has(n)))];
+    const notes = [];
+    if (lines.length !== 5) notes.push(`ได้ ${lines.length} บรรทัด (ขอไว้ 5 บรรทัด)`);
+    if (extra.length) notes.push('พบตัวเลขที่ไม่อยู่ในข้อมูลที่ส่ง: ' + extra.join(', '));
+    execOut.textContent = lines.join('\n');
+    execNote.className = 'od-exec-note' + (notes.length ? ' is-bad' : '');
+    execNote.textContent = notes.length ? 'ตรวจแล้ว: ' + notes.join(' · ') : 'ตรวจแล้ว: 5 บรรทัด และตัวเลขทุกตัวอยู่ในข้อมูลที่ส่ง';
+  };
+  const manual = root.querySelector('.od-exec-manual');
+  const promptBox = root.querySelector('.od-exec-prompt');
+  const pasteBox = root.querySelector('.od-exec-paste');
+  const copied = root.querySelector('.od-exec-copied');
+  let manualPayload = null;
+  root.querySelector('.od-exec-copy').addEventListener('click', async () => {
+    promptBox.focus();
+    promptBox.select();
+    let ok = false;
+    try { await navigator.clipboard.writeText(promptBox.value); ok = true; } catch (e) { ok = false; }
+    copied.textContent = ok ? 'คัดลอกแล้ว' : 'เลือกข้อความไว้แล้ว กด Ctrl+C เพื่อคัดลอก';
+  });
+  root.querySelector('.od-exec-verify').addEventListener('click', () => {
+    if (!manualPayload || !pasteBox.value.trim()) return;
+    checkSummary(pasteBox.value, manualPayload);
+  });
+
+  execBtn.addEventListener('click', async () => {
+    if (!latestSummary) return;
+    const payload = latestSummary;
+    execPanel.hidden = false;
+    root.querySelector('.od-exec-json').textContent = JSON.stringify(payload, null, 2);
+    root.querySelector('.od-exec-count').textContent = count(leaves(payload).length);
+    execNote.className = 'od-exec-note';
+    execNote.textContent = '';
+    const prompt = buildPrompt(payload);
+    const sample = await samplePromise;
+    if (!sample) {
+      manualPayload = payload;
+      promptBox.value = prompt;
+      pasteBox.value = '';
+      copied.textContent = '';
+      manual.hidden = false;
+      execOut.textContent = '';
+      execNote.className = 'od-exec-note';
+      execNote.textContent = 'แดชบอร์ดนี้เรียก Claude เองไม่ได้ จึงให้คัดลอกคำสั่งไปถาม Claude แล้ววางคำตอบกลับมาตรวจตัวเลข';
+      return;
+    }
+    manual.hidden = true;
+    execBtn.disabled = true;
+    execOut.textContent = 'กำลังเขียนบทสรุป...';
+    try {
+      const { text } = await sample(prompt, { onText: ({ text }) => { execOut.textContent = text; } });
+      checkSummary(text, payload);
+    } catch (e) {
+      execOut.textContent = e && e.text ? e.text : '';
+      if (!e || e.code !== 'cancelled') {
+        execNote.className = 'od-exec-note is-bad';
+        execNote.textContent = (e && execMessages[e.code]) || 'เขียนบทสรุปไม่สำเร็จ ลองกดใหม่อีกครั้ง';
+      }
+    } finally {
+      execBtn.disabled = !latestSummary;
+    }
+  });
+
+  // Executive report: every number comes from latestSummary
+  const fmtN = (v, d = 0) => new Intl.NumberFormat('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+  const fmtB = (v, d = 0) => '฿' + fmtN(v, d);
+  // A bullet is a string, or a list of [label, text] parts shown on their own lines
+  function buildReport(S) {
+    const out = [];
+    out.push({ h: 'ภาพรวมยอดขาย', bullets: [
+      `ยอดขายสุทธิ ${fmtB(S.ยอดขายสุทธิ_บาท)} (หลังหักส่วนลด ไม่รวมค่าจัดส่ง)`,
+      `คำสั่งซื้อที่จัดส่งสำเร็จ ${fmtN(S.คำสั่งซื้อสำเร็จ)} รายการ`,
+      `มูลค่าเฉลี่ยต่อคำสั่งซื้อ (AOV) ${fmtB(S.AOV_บาท, 2)}`,
+    ] });
+    out.push({ h: 'สถานะคำสั่งซื้อ', bullets: [
+      `คำสั่งซื้อทั้งหมด ${fmtN(S.คำสั่งซื้อทั้งหมด)} รายการ`,
+      `ยกเลิก ${fmtN(S.คำสั่งซื้อยกเลิก)} รายการ คิดเป็นอัตรายกเลิก ${fmtN(S.อัตรายกเลิก_ร้อยละ, 2)}%`,
+      `คืนสินค้า ${fmtN(S.คำสั่งซื้อคืนสินค้า)} รายการ`,
+    ] });
+    out.push({ h: 'แนวโน้มรายเดือน', bullets: [
+      `เดือนที่ยอดขายสูงสุด: ${S.เดือนยอดสูงสุด.เดือน} ยอด ${fmtB(S.เดือนยอดสูงสุด.ยอดขาย_บาท)}`,
+      `เดือนที่ยอดขายต่ำสุด: ${S.เดือนยอดต่ำสุด.เดือน} ยอด ${fmtB(S.เดือนยอดต่ำสุด.ยอดขาย_บาท)}`,
+    ] });
+    const C = S.ช่องทางอันดับแรก, R = S.ภูมิภาคอันดับแรก, P = S.จังหวัดอันดับแรก, T = S.บริษัทขนส่งอันดับแรก;
+    const area = [];
+    if (C) area.push(`ช่องทางอันดับแรก: ${C.ชื่อ} สัดส่วน ${fmtN(C.สัดส่วนยอดขาย_ร้อยละ, 2)}% ของยอดขาย`);
+    if (R) area.push(`ภูมิภาคอันดับแรก: ${R.ชื่อ} สัดส่วน ${fmtN(R.สัดส่วนยอดขาย_ร้อยละ, 2)}%`);
+    if (P) area.push(`จังหวัดอันดับแรก: ${P.ชื่อ} สัดส่วน ${fmtN(P.สัดส่วนยอดขาย_ร้อยละ, 2)}%`);
+    if (area.length) out.push({ h: 'ช่องทางและพื้นที่', bullets: area });
+    if (T) out.push({ h: 'การจัดส่ง', bullets: [
+      `บริษัทขนส่งอันดับแรก: ${T.ชื่อ} สัดส่วน ${fmtN(T.สัดส่วนยอดขาย_ร้อยละ, 2)}% ของยอดขาย`,
+      ...(T.ส่งเฉลี่ย_วัน != null ? [`ระยะเวลาส่งเฉลี่ย ${fmtN(T.ส่งเฉลี่ย_วัน, 2)} วัน`] : []),
+    ] });
+    const M = S.วันเมกะเซล;
+    if (M && M.จำนวนวัน) out.push({ h: 'วันเมกะเซล', bullets: [
+      `วันเมกะเซล ${fmtN(M.จำนวนวัน)} วัน มีสัดส่วนยอดขาย ${fmtN(M.สัดส่วนยอดขาย_ร้อยละ, 2)}%`,
+      `ยอดขายเฉลี่ยต่อวัน ${fmtB(M.ยอดขายเฉลี่ยต่อวัน_บาท)} เทียบวันปกติ ${fmtB(M.วันปกติยอดขายเฉลี่ยต่อวัน_บาท)}`,
+      `กำไรขั้นต้น ${fmtN(M.กำไรขั้นต้น_ร้อยละ, 2)}% เทียบวันปกติ ${fmtN(M.วันปกติกำไรขั้นต้น_ร้อยละ, 2)}%`,
+      ...(M.วันยอดสูงสุด ? [`วันที่ขายดีที่สุด: ${M.วันยอดสูงสุด} ยอด ${fmtB(M.วันยอดสูงสุดยอดขาย_บาท)}`] : []),
+    ] });
+
+    // Recommendations: cause -> effect -> fix, most important first
+    const recs = [];
+    if (M && M.จำนวนวัน && M.กำไรขั้นต้น_ร้อยละ < M.วันปกติกำไรขั้นต้น_ร้อยละ) recs.push([
+      ['เหตุ', `วันเมกะเซลกำไรขั้นต้น ${fmtN(M.กำไรขั้นต้น_ร้อยละ, 2)}% ต่ำกว่าวันปกติ ${fmtN(M.วันปกติกำไรขั้นต้น_ร้อยละ, 2)}%`],
+      ['ผล', 'ขายได้มากขึ้นแต่ได้กำไรต่อยอดขายน้อยลง'],
+      ['แนวทาง', 'ตั้งเพดานส่วนลด ให้ส่วนลดเฉพาะสินค้ากำไรสูง และกำหนดยอดสั่งซื้อขั้นต่ำ'],
+    ]);
+    if (S.คำสั่งซื้อยกเลิก || S.คำสั่งซื้อคืนสินค้า) recs.push([
+      ['เหตุ', `ยกเลิก ${fmtN(S.คำสั่งซื้อยกเลิก)} และคืนสินค้า ${fmtN(S.คำสั่งซื้อคืนสินค้า)} รายการ`],
+      ['ผล', 'สูญเสียยอดขายและเพิ่มต้นทุนขนส่งซ้ำ'],
+      ['แนวทาง', 'ตรวจสต็อกก่อนรับคำสั่งซื้อ และปรับรายละเอียดสินค้าให้ตรงจริง'],
+    ]);
+    if (C && R) recs.push([
+      ['เหตุ', `ยอดขายพึ่งพา${C.ชื่อ} ${fmtN(C.สัดส่วนยอดขาย_ร้อยละ, 2)}% และ${R.ชื่อ} ${fmtN(R.สัดส่วนยอดขาย_ร้อยละ, 2)}%`],
+      ['ผล', 'เสี่ยงหากช่องทางหรือพื้นที่หลักชะลอตัว'],
+      ['แนวทาง', 'ทำแคมเปญเจาะภูมิภาครองและช่องทางอื่น'],
+    ]);
+    recs.push([
+      ['เหตุ', `ยอดขาย ${S.เดือนยอดต่ำสุด.เดือน} ต่ำสุดที่ ${fmtB(S.เดือนยอดต่ำสุด.ยอดขาย_บาท)}`],
+      ['ผล', 'รายได้ไม่สม่ำเสมอและสต็อกค้าง'],
+      ['แนวทาง', 'จัดโปรโมชันช่วงซบเซาและวางแผนสต็อกล่วงหน้า'],
+    ]);
+    out.push({ h: 'ข้อเสนอแนะ', bullets: recs });
+    return out;
+  }
+  const bulletText = (b) => typeof b === 'string' ? b : b.map(([k, v]) => `${k}: ${v}`).join(' ');
+  const wordCount = (text) => {
+    if (typeof Intl.Segmenter === 'function') return [...new Intl.Segmenter('th', { granularity: 'word' }).segment(text)].filter((x) => x.isWordLike).length;
+    return text.split(/\s+/).filter(Boolean).length;
+  };
+  const SECTION_LIMIT = 100;
+  const sectionWords = (sec) => wordCount([sec.h, ...sec.bullets.map(bulletText)].join(' '));
+  let currentReport = null;
+  function fitReport(S) {
+    const sections = buildReport(S).map((sec) => {
+      const s2 = { ...sec, bullets: sec.bullets.slice() };
+      while (sectionWords(s2) > SECTION_LIMIT && s2.bullets.length > 1) s2.bullets.pop();
+      return { ...s2, words: sectionWords(s2) };
+    });
+    return { sections, words: d3.sum(sections, (x) => x.words) };
+  }
+  const reportBox = root.querySelector('.od-report');
+  const pdfBtn = root.querySelector('.od-pdf');
+  const pdfNote = root.querySelector('.od-pdf-note');
+  const reportKpis = (S) => [
+    ['ยอดขายสุทธิ', fmtB(S.ยอดขายสุทธิ_บาท)],
+    ['คำสั่งซื้อสำเร็จ', fmtN(S.คำสั่งซื้อสำเร็จ)],
+    ['AOV', fmtB(S.AOV_บาท, 2)],
+    ['อัตรายกเลิก', fmtN(S.อัตรายกเลิก_ร้อยละ, 2) + '%'],
+  ];
+  function drawReport() {
+    const S = latestSummary;
+    if (!S) {
+      currentReport = null;
+      pdfBtn.disabled = true;
+      reportBox.replaceChildren(Object.assign(document.createElement('p'), { className: 'od-empty', textContent: 'ไม่มีคำสั่งซื้อสำเร็จตามตัวกรองนี้' }));
+      root.querySelector('.od-report-words').textContent = '—';
+      return;
+    }
+    currentReport = { scope: S.ขอบเขตข้อมูล, kpis: reportKpis(S), ...fitReport(S) };
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const kp = el('div', 'od-report-kpis');
+    for (const [k, v] of currentReport.kpis) { const d = el('div'); d.append(el('span', null, k), el('b', null, v)); kp.append(d); }
+    reportBox.replaceChildren(el('h2', 'od-report-title', 'บทสรุปผู้บริหาร'), el('p', 'od-sub', 'บ้านสบาย ช๊อป · ขอบเขต: ' + currentReport.scope), kp,
+      ...currentReport.sections.map((sec) => {
+        const d = el('div');
+        const h = el('h3', null, sec.h);
+        h.append(el('span', 'od-report-count', ` · ${fmtN(sec.words)} คำ`));
+        const ul = el('ul');
+        for (const b of sec.bullets) {
+          const li = el('li');
+          if (typeof b === 'string') li.textContent = b;
+          else for (const [k, v] of b) { const line = el('div'); line.append(el('b', null, k + ': '), v); li.append(line); }
+          ul.append(li);
+        }
+        d.append(h, ul);
+        return d;
+      }));
+    root.querySelector('.od-report-words').textContent = `${currentReport.sections.length} หัวข้อ · รวม ${fmtN(currentReport.words)} คำ (ไม่เกิน ${SECTION_LIMIT} คำต่อหัวข้อ)`;
+    pdfBtn.disabled = false;
+  }
+
+  // PDF: each A4 page is the report drawn on a canvas (exact Thai rendering) with an
+  // invisible text layer on top, so the text can be selected, searched and copied.
+  function wrapLines(ctx, text, maxW) {
+    const segs = typeof Intl.Segmenter === 'function' ? [...new Intl.Segmenter('th', { granularity: 'word' }).segment(text)].map((x) => x.segment) : [...text];
+    const lines = [];
+    let line = '';
+    for (const seg of segs) {
+      const next = line + seg;
+      if (line && ctx.measureText(next).width > maxW) { lines.push(line.trimEnd()); line = seg.trimStart(); }
+      else line = next;
+    }
+    if (line.trim()) lines.push(line.trimEnd());
+    return lines;
+  }
+  async function renderPages(R) {
+    const W = 1240, H = 1754, M = 110, inner = W - 2 * M;
+    const font = (w, px) => `${w} ${px}px Prompt, ${getComputedStyle(root).fontFamily}`;
+    try { await Promise.all([document.fonts.load(font(400, 26)), document.fonts.load(font(700, 30))]); } catch (e) { /* the page font is used instead */ }
+    const pages = [];
+    let ctx, y, runs;
+    const today = new Intl.DateTimeFormat('th-TH', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+    const newPage = () => {
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      ctx = c.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H); ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#185fa5'; ctx.fillRect(0, 0, W, 14);
+      runs = [];
+      pages.push({ canvas: c, runs });
+      y = M;
+    };
+    // Draws one line and records it for the text layer
+    const text = (str, x, baseline, px, weight, color) => {
+      ctx.font = font(weight, px); ctx.fillStyle = color;
+      ctx.fillText(str, x, baseline);
+      runs.push({ str, x, y: baseline, px, w: ctx.measureText(str).width });
+    };
+    const ensure = (h) => { if (y + h > H - M - 40) newPage(); };
+    newPage();
+    text('บทสรุปผู้บริหาร', M, y + 46, 52, 700, '#0c447c'); y += 76;
+    ctx.font = font(400, 24);
+    for (const l of wrapLines(ctx, `บ้านสบาย ช๊อป · ขอบเขต: ${R.scope} · จัดทำวันที่ ${today}`, inner)) { text(l, M, y + 24, 24, 400, '#5f6b7a'); y += 38; }
+    y += 18;
+    const gap = 20, bw = (inner - gap * 3) / 4, bh = 116;
+    R.kpis.forEach(([k, v], i) => {
+      const x = M + i * (bw + gap);
+      ctx.fillStyle = '#e6f1fb'; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, bw, bh, 14); else ctx.rect(x, y, bw, bh); ctx.fill();
+      text(k, x + 20, y + 42, 22, 400, '#185fa5');
+      text(v, x + 20, y + 88, 30, 700, '#0c447c');
+    });
+    y += bh + 44;
+    const LH = 44, bulletX = M + 8, textX = M + 40, textW = inner - 40;
+    for (const sec of R.sections) {
+      ctx.font = font(400, 26);
+      const firstLines = (() => { const b = sec.bullets[0]; const t = typeof b === 'string' ? b : `${b[0][0]}: ${b[0][1]}`; return Math.min(2, wrapLines(ctx, t, textW).length); })();
+      ensure(60 + firstLines * LH);
+      ctx.fillStyle = '#185fa5'; ctx.fillRect(M, y + 8, 6, 32);
+      text(sec.h, M + 22, y + 36, 32, 700, '#185fa5');
+      y += 62;
+      for (const b of sec.bullets) {
+        const parts = typeof b === 'string' ? [[null, b]] : b;
+        parts.forEach(([label, body], pi) => {
+          ensure(LH);
+          if (pi === 0) text('•', bulletX, y + 30, 26, 700, '#185fa5');
+          let indent = 0;
+          if (label) {
+            text(label + ':', textX, y + 30, 26, 700, '#0c447c');
+            ctx.font = font(700, 26);
+            indent = ctx.measureText(label + ': ').width;
+          }
+          ctx.font = font(400, 26);
+          // First line sits after the label; the rest wrap back to the text edge
+          const head = wrapLines(ctx, body, textW - indent);
+          text(head[0] || '', textX + indent, y + 30, 26, 400, '#1f2933');
+          y += LH;
+          for (const l of wrapLines(ctx, body.slice((head[0] || '').length).trimStart(), textW)) {
+            ensure(LH);
+            text(l, textX, y + 30, 26, 400, '#1f2933');
+            y += LH;
+          }
+        });
+        y += 10;
+      }
+      y += 24;
+    }
+    pages.forEach((p, i) => {
+      ctx = p.canvas.getContext('2d'); runs = p.runs;
+      text(`บ้านสบาย ช๊อป · ข้อมูลจาก orders.csv และ products.csv`, M, H - 60, 20, 400, '#8a94a3');
+      ctx.font = font(400, 20);
+      const tag = `หน้า ${i + 1}/${pages.length}`;
+      text(tag, W - M - ctx.measureText(tag).width, H - 60, 20, 400, '#8a94a3');
+    });
+    return pages;
+  }
+  async function pagesToPdf(pages) {
+    const enc = new TextEncoder();
+    const chunks = [], offsets = [];
+    let size = 0;
+    const put = (part) => { const b = typeof part === 'string' ? enc.encode(part) : part; chunks.push(b); size += b.length; };
+    const obj = (n, body) => { offsets[n] = size; put(`${n} 0 obj\n`); body(); put('\nendobj\n'); };
+    const stream = (n, dict, data) => obj(n, () => { const b = typeof data === 'string' ? enc.encode(data) : data; put(`<< ${dict} /Length ${b.length} >>\nstream\n`); put(b); put('\nendstream'); });
+    const jpegs = await Promise.all(pages.map((p) => new Promise((res, rej) => p.canvas.toBlob((b) => b ? b.arrayBuffer().then((buf) => res(new Uint8Array(buf)), rej) : rej(new Error('canvas')), 'image/jpeg', 0.92))));
+    const pw = 595.28, ph = 841.89, n = pages.length, FIRST = 7, total = FIRST + 3 * n;
+    const W = pages[0].canvas.width, H = pages[0].canvas.height, sx = pw / W, sy = ph / H;
+    const hex4 = (c) => c.toString(16).toUpperCase().padStart(4, '0');
+    const used = new Set();
+    for (const p of pages) for (const r of p.runs) for (const ch of r.str) { const c = ch.codePointAt(0); if (c <= 0xFFFF) used.add(c); }
+    const codes = [...used].sort((a, b) => a - b);
+    const blocks = [];
+    for (let i = 0; i < codes.length; i += 100) {
+      const part = codes.slice(i, i + 100);
+      blocks.push(`${part.length} beginbfchar\n${part.map((c) => `<${hex4(c)}> <${hex4(c)}>`).join('\n')}\nendbfchar`);
+    }
+    const cmap = `/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def\n/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n1 begincodespacerange\n<0000> <FFFF>\nendcodespacerange\n${blocks.join('\n')}\nendcmap\nCMapName currentdict /CMap defineresource pop\nend\nend`;
+    put('%PDF-1.4\n');
+    obj(1, () => put('<< /Type /Catalog /Pages 2 0 R >>'));
+    obj(2, () => put(`<< /Type /Pages /Count ${n} /Kids [${pages.map((_, i) => `${FIRST + 3 * i} 0 R`).join(' ')}] >>`));
+    obj(3, () => put('<< /Type /Font /Subtype /Type0 /BaseFont /ReportText /Encoding /Identity-H /DescendantFonts [4 0 R] /ToUnicode 6 0 R >>'));
+    obj(4, () => put('<< /Type /Font /Subtype /CIDFontType2 /BaseFont /ReportText /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor 5 0 R /DW 500 /CIDToGIDMap /Identity >>'));
+    obj(5, () => put('<< /Type /FontDescriptor /FontName /ReportText /Flags 32 /FontBBox [0 -250 1000 1000] /ItalicAngle 0 /Ascent 1000 /Descent -250 /CapHeight 700 /StemV 80 >>'));
+    stream(6, '', cmap);
+    pages.forEach((p, i) => {
+      const pg = FIRST + 3 * i;
+      obj(pg, () => put(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im0 ${pg + 2} 0 R >> /Font << /F1 3 0 R >> >> /Contents ${pg + 1} 0 R >>`));
+      const textOps = p.runs.filter((r) => r.str.trim()).map((r) => {
+        const chars = [...r.str].filter((ch) => ch.codePointAt(0) <= 0xFFFF);
+        const fs = r.px * sy;
+        const nominal = chars.length * 0.5 * fs;
+        const tz = nominal ? Math.max(1, 100 * (r.w * sx) / nominal) : 100;
+        return `BT /F1 ${fs.toFixed(2)} Tf 3 Tr ${tz.toFixed(2)} Tz 1 0 0 1 ${(r.x * sx).toFixed(2)} ${(ph - r.y * sy).toFixed(2)} Tm <${chars.map((ch) => hex4(ch.codePointAt(0))).join('')}> Tj ET`;
+      }).join('\n');
+      stream(pg + 1, '', `q ${pw} 0 0 ${ph} 0 0 cm /Im0 Do Q\n${textOps}`);
+      stream(pg + 2, `/Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode`, jpegs[i]);
+    });
+    const xref = size;
+    put(`xref\n0 ${total}\n0000000000 65535 f \n` + Array.from({ length: total - 1 }, (_, k) => String(offsets[k + 1]).padStart(10, '0') + ' 00000 n \n').join(''));
+    put(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+    return new Blob(chunks, { type: 'application/pdf' });
+  }
+  const downloadsPromise = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+  pdfBtn.addEventListener('click', async () => {
+    if (!currentReport) return;
+    pdfBtn.disabled = true;
+    pdfNote.className = 'od-pdf-note od-exec-note';
+    pdfNote.textContent = 'กำลังสร้าง PDF...';
+    const filename = 'บทสรุปผู้บริหาร-บ้านสบายช๊อป.pdf';
+    try {
+      const blob = await pagesToPdf(await renderPages(currentReport));
+      const downloads = await downloadsPromise;
+      if (downloads) {
+        await downloads.save({ filename, data: blob });
+        pdfNote.textContent = 'บันทึก PDF แล้ว';
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = filename;
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+        pdfNote.textContent = 'ส่ง PDF ให้เบราว์เซอร์ดาวน์โหลดแล้ว';
+      }
+    } catch (e) {
+      const code = e && e.code;
+      pdfNote.className = 'od-pdf-note od-exec-note' + (code === 'declined' ? '' : ' is-bad');
+      pdfNote.textContent = code === 'declined' ? 'ยกเลิกการบันทึก' : code === 'rate_limited' ? 'มีหน้าต่างบันทึกเปิดอยู่ ลองใหม่อีกครั้ง' : 'สร้างหรือบันทึก PDF ไม่สำเร็จ';
+    } finally {
+      pdfBtn.disabled = !currentReport;
+    }
+  });
+
+  // Replacing a data file: editors only (assets and db are writer capabilities)
+  const UPLOAD = {
+    orders: { need: ['order_id', 'order_datetime', 'channel', 'region', 'province', 'product_id', 'category', 'qty', 'unit_price', 'discount_pct', 'status', 'carrier', 'ship_days'] },
+    products: { need: ['product_id', 'unit_cost'] },
+  };
+  const useCap = (name) => (window.claude && typeof window.claude.use === 'function') ? window.claude.use(name).catch(() => null) : Promise.resolve(null);
+  const assetsPromise = useCap('assets'), dbPromise = useCap('db'), userPromise = useCap('user');
+  const parseHeader = (line) => line.replace(/^﻿/, '').split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
+  const countRows = (text) => text.split(/\r?\n/).slice(1).filter((l) => l.trim()).length;
+  Promise.all([assetsPromise, dbPromise]).then(async ([assets, db]) => {
+    for (const item of root.querySelectorAll('.od-upload-item')) {
+      const id = item.dataset.ds;
+      const btn = item.querySelector('.od-up-btn'), input = item.querySelector('input[type=file]');
+      const msg = item.querySelector('.od-up-msg'), confirmBox = item.querySelector('.od-up-confirm');
+      const say = (text, kind = '') => { msg.className = 'od-up-msg' + (kind ? ' is-' + kind : ''); msg.textContent = text; };
+      if (db) {
+        try {
+          const snap = await db.doc('datasets/' + id).get();
+          const name = snap.exists && snap.data() && snap.data().source && snap.data().source.name;
+          if (name) item.querySelector('.od-up-name').textContent = name;
+        } catch (e) { /* keep the default name */ }
+      }
+      if (!assets || !db) continue;
+      btn.hidden = false;
+      btn.addEventListener('click', () => { input.value = ''; input.click(); });
+      input.addEventListener('change', async () => {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        say('');
+        if (!/\.csv$/i.test(file.name)) { say('เลือกไฟล์ .csv เท่านั้น', 'bad'); return; }
+        const text = await file.text();
+        const header = parseHeader(text.split(/\r?\n/, 1)[0] || '');
+        const missing = UPLOAD[id].need.filter((c) => !header.includes(c));
+        if (missing.length) { say('ไฟล์นี้ขาดคอลัมน์: ' + missing.join(', '), 'bad'); return; }
+        const rowsN = countRows(text);
+        if (!rowsN) { say('ไฟล์นี้ไม่มีข้อมูล', 'bad'); return; }
+        const yes = Object.assign(document.createElement('button'), { type: 'button', className: 'od-yes', textContent: 'ยืนยันแทนที่' });
+        const no = Object.assign(document.createElement('button'), { type: 'button', textContent: 'ยกเลิก' });
+        confirmBox.replaceChildren(`แทนที่ข้อมูลเดิมด้วย ${file.name} (${count(rowsN)} แถว) สำหรับทุกคนที่เปิดแดชบอร์ดนี้?`, yes, no);
+        confirmBox.hidden = false;
+        no.addEventListener('click', () => { confirmBox.hidden = true; say('ยกเลิกแล้ว'); });
+        yes.addEventListener('click', async () => {
+          confirmBox.hidden = true;
+          btn.disabled = true;
+          say('กำลังอัปโหลด...');
+          try {
+            const up = await assets.upload(file, { type: 'text/csv' });
+            let by = 'ผู้แก้ไขแดชบอร์ด';
+            try { const user = await userPromise; const me = user && await user.me(); if (me && me.name) by = me.name; } catch (e) { /* keep the generic name */ }
+            await db.doc('datasets/' + id).update({ source: { kind: 'file', url: up.url, name: file.name, format: 'csv' }, updated: { at: new Date().toISOString(), by } });
+            item.querySelector('.od-up-name').textContent = file.name;
+            say(`อัปโหลดแล้ว ${count(rowsN)} แถว กำลังโหลดข้อมูลใหม่`, 'ok');
+            try { dash.refresh(id); } catch (e) { /* the dashboard reloads the source on its own */ }
+          } catch (e) {
+            const code = e && e.code;
+            say(code === 'invalid_request' ? 'อัปโหลดไม่ได้: ไฟล์ต้องเข้ารหัสแบบ UTF-8'
+              : code === 'too_large' ? 'ไฟล์ใหญ่เกินไป'
+              : code === 'not_granted' || code === 'permission_denied' ? 'ไม่มีสิทธิ์แก้ไขข้อมูลของแดชบอร์ดนี้'
+              : 'อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง', 'bad');
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+  });
+  const setUploadMeta = (id, text) => { const e = root.querySelector(`.od-upload-item[data-ds="${id}"] .od-up-meta`); if (e) e.textContent = text; };
+
+  function render() {
+    const cube = dash.data('cube');
+    const lineEl = root.querySelector('.od-line'), barEl = root.querySelector('.od-bars'), check = root.querySelector('#row-check');
+    if (cube.status !== 'ok') {
+      const failed = cube.status === 'error' || cube.status === 'connect' || cube.status === 'declined' || cube.status === 'missing';
+      setSkeleton(!failed);
+      root.querySelectorAll('[data-k]').forEach((el) => { el.textContent = '—'; });
+      root.querySelector('.od-take').textContent = '—';
+      const regionEl = root.querySelector('.od-region-bars');
+      if (failed) { failLine(lineEl); failLine(barEl); failLine(regionEl); failLine(check); }
+      else { lineEl.replaceChildren(); barEl.replaceChildren(); regionEl.replaceChildren(); check.replaceChildren(Object.assign(document.createElement('span'), { className: 'dash-skeleton', textContent: '—' })); }
+      return;
+    }
+    setSkeleton(false);
+    const all = cube.data;
+    const { region = null, category = null, channel = null, from = null, to = null } = dash.params();
+    fillSelect(regionSel, 'ทุกภูมิภาค', [...new Set(all.map((r) => r.region).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th')), region);
+    fillSelect(catSel, 'ทุกหมวดสินค้า', [...new Set(all.map((r) => r.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th')), category);
+    fillSelect(chanSel, 'ทุกช่องทาง', [...new Set(all.map((r) => r.channel).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th')), channel);
+    const allDates = [...new Set(all.filter((r) => r.valid).map((r) => r.date))].sort();
+    if (allDates.length) {
+      fromIn.min = toIn.min = allDates[0];
+      fromIn.max = toIn.max = allDates[allDates.length - 1];
+    }
+    showDates();
+
+    const inDates = (r) => (!from || r.date >= from) && (!to || r.date <= to);
+    const pass = (r) => (!region || r.region === region) && (!category || r.category === category) && (!channel || r.channel === channel) && inDates(r);
+    const rows = all.filter(pass);
+    const ok = rows.filter((r) => r.status === SUCCESS && r.valid);
+    const totalRead = d3.sum(all, (r) => r.orders);
+    const inFilter = d3.sum(rows, (r) => r.orders);
+    const net = d3.sum(ok, (r) => r.net);
+    const nOk = d3.sum(ok, (r) => r.orders);
+    const nCancel = d3.sum(rows.filter((r) => r.status === CANCEL), (r) => r.orders);
+    const invalid = d3.sum(rows.filter((r) => !r.valid), (r) => r.orders);
+
+    const set = (k, v) => { root.querySelector(`[data-k="${k}"]`).textContent = v; };
+    set('net', baht(net));
+    set('orders', count(nOk));
+    set('aov', nOk ? baht2(net / nOk) : '—');
+    set('cancel', inFilter ? pct(nCancel / inFilter) : '—');
+
+    // Row and status check under the cards
+    const parts = [];
+    const add = (label, value, color) => {
+      const s = document.createElement('span'); s.className = 'od-chip';
+      if (color) { const d = document.createElement('span'); d.className = 'od-dot'; d.style.background = color; s.append(d); }
+      const b = document.createElement('b'); b.textContent = value;
+      s.append(label + ' ', b); parts.push(s);
+    };
+    add('อ่านได้', count(totalRead) + ' แถว');
+    setUploadMeta('orders', ` · ${count(totalRead)} คำสั่งซื้อ`);
+    const prodSrc = dash.data('products');
+    setUploadMeta('products', prodSrc.status === 'ok' ? ` · ต้นทุน ${count(prodSrc.data.length)} สินค้า` : '');
+    if (region || category || channel || from || to) add('ตามตัวกรอง', count(inFilter) + ' แถว');
+    const byStatus = d3.rollups(rows, (v) => d3.sum(v, (r) => r.orders), (r) => r.status || '(ว่าง)').sort((a, b) => b[1] - a[1]);
+    for (const [s, n] of byStatus) add(s, count(n), statusColor(s));
+    if (invalid) add('ตัวเลข/วันที่อ่านไม่ได้', count(invalid), 'var(--color-bad)');
+    check.replaceChildren(...parts);
+
+    const months = d3.rollups(ok, (v) => ({ net: d3.sum(v, (r) => r.net), orders: d3.sum(v, (r) => r.orders) }), (r) => r.month)
+      .map(([month, v]) => ({ month, ...v }))
+      .sort((a, b) => d3.ascending(monthDate(a.month), monthDate(b.month)));
+    drawLine(lineEl, months);
+
+    const channels = d3.rollups(ok, (v) => ({ net: d3.sum(v, (r) => r.net), orders: d3.sum(v, (r) => r.orders) }), (r) => r.channel)
+      .map(([channel, v]) => ({ channel, ...v }))
+      .sort((a, b) => b.net - a.net);
+    drawProvinceList(barEl, channels, 'channel', 'ช่องทาง');
+
+    const regions = d3.rollups(ok, (v) => ({ net: d3.sum(v, (r) => r.net), orders: d3.sum(v, (r) => r.orders) }), (r) => r.region)
+      .map(([region, v]) => ({ region, ...v }))
+      .sort((a, b) => b.net - a.net);
+    drawProvinceList(root.querySelector('.od-region-bars'), regions, 'region', 'ภูมิภาค');
+
+    const sideChart = (id, cls, key, rowH, withOrders = false, minH = 260) => {
+      const el = root.querySelector(cls), src = dash.data(id);
+      if (src.status === 'ok') {
+        const sel = src.data.filter(pass);
+        const agg = d3.rollups(sel, (v) => ({ net: d3.sum(v, (r) => r.net), orders: d3.sum(v, (r) => r.orders), shipDays: d3.sum(v, (r) => r.shipDays), shipOrders: d3.sum(v, (r) => r.shipOrders) }), (r) => r[key])
+          .map(([k, v]) => ({ [key]: k, ...v }))
+          .sort((a, b) => b.net - a.net);
+        if (key === 'province') drawProvinceList(el, agg);
+        else if (key === 'carrier') drawProvinceList(el, agg, 'carrier', 'บริษัท', (p) => p.shipOrders ? ` · ส่งเฉลี่ย ${days(p.shipDays / p.shipOrders)} วัน` : '');
+        else drawBars(el, agg, key, rowH, withOrders, minH);
+        return agg;
+      } else if (src.status === 'loading') el.replaceChildren();
+      else failLine(el);
+      return [];
+    };
+    const carriers = sideChart('by_carrier', '.od-carrier', 'carrier', 44, false, 0);
+    const provinces = sideChart('by_province', '.od-province', 'province', 30);
+
+    const rpGrid = root.querySelector('.od-rp-grid'), prov = dash.data('by_province');
+    if (prov.status === 'ok') drawRegionProvinces(rpGrid, prov.data.filter((r) => (!category || r.category === category) && (!channel || r.channel === channel) && inDates(r)), region);
+    else if (prov.status === 'loading') rpGrid.replaceChildren();
+    else failLine(rpGrid);
+
+    const dateScope = from || to ? `${from ? thDate(from) : 'เริ่มต้นข้อมูล'} – ${to ? thDate(to) : 'สิ้นสุดข้อมูล'}` : '';
+    const scope = [region, category, channel, dateScope].filter(Boolean).join(' · ') || 'ทุกภูมิภาค ทุกหมวด และทุกช่องทาง';
+    const top = channels[0];
+    root.querySelector('.od-take').textContent = nOk
+      ? `${scope}: ยอดขายสุทธิ ${baht(net)} จาก ${count(nOk)} คำสั่งซื้อสำเร็จ` + (top ? ` · ช่องทาง ${top.channel} ทำยอดสูงสุด (${pct(top.net / net)})` : '')
+      : `${scope}: ไม่มีคำสั่งซื้อสำเร็จ`;
+
+    // Mega-sale tab
+    const megaSrc = dash.data('mega');
+    const salesBox = root.querySelector('.od-mega-sales'), marginBox = root.querySelector('.od-mega-margin');
+    const mset = (k, v) => { const e = root.querySelector(`[data-m="${k}"]`); e.textContent = v; e.classList.remove('dash-skeleton'); };
+    let mega = null;
+    if (megaSrc.status === 'ok') {
+      const mrows = megaSrc.data.filter(pass);
+      const daysInRange = allDates.filter((d) => (!from || d >= from) && (!to || d <= to));
+      const megaSet = new Set(megaSrc.data.filter((r) => r.kind === 'mega').map((r) => r.date));
+      const megaDates = daysInRange.filter((d) => megaSet.has(d));
+      const normalDays = daysInRange.length - megaDates.length;
+      const sumUp = (v) => ({ net: d3.sum(v, (r) => r.net), cost: d3.sum(v, (r) => r.cost), orders: d3.sum(v, (r) => r.orders) });
+      const megaTot = sumUp(mrows.filter((r) => r.kind === 'mega')), normTot = sumUp(mrows.filter((r) => r.kind === 'normal'));
+      const allNet = megaTot.net + normTot.net;
+      const margin = (t) => t.net ? (t.net - t.cost) / t.net : 0;
+      const megaPerDay = megaDates.length ? megaTot.net / megaDates.length : 0;
+      const normPerDay = normalDays ? normTot.net / normalDays : 0;
+      const one = (v) => new Intl.NumberFormat('th-TH', { maximumFractionDigits: 1 }).format(v);
+      mset('share', allNet ? pct(megaTot.net / allNet) : '—');
+      mset('share-note', `${count(megaDates.length)} วันเมกะเซล จากทั้งหมด ${count(megaDates.length + normalDays)} วันในช่วงที่เลือก`);
+      mset('perday', baht(megaPerDay));
+      mset('perday-note', normPerDay ? `วันปกติ ${baht(normPerDay)} ต่อวัน · สูงกว่า ${one(megaPerDay / normPerDay)} เท่า` : 'วันปกติ —');
+      mset('mmargin', megaTot.net ? pct(margin(megaTot)) : '—');
+      mset('mmargin-note', `กำไรขั้นต้น ${baht(megaTot.net - megaTot.cost)} จากยอดขาย ${baht(megaTot.net)}`);
+      mset('nmargin', normTot.net ? pct(margin(normTot)) : '—');
+      const gap = (margin(megaTot) - margin(normTot)) * 100;
+      mset('nmargin-note', megaTot.net && normTot.net ? `วันเมกะเซล${gap < 0 ? 'ต่ำกว่า' : 'สูงกว่า'}วันปกติ ${one(Math.abs(gap))} จุด` : '—');
+
+      const accent = dash.colors[0], normalColor = 'var(--cds-chart-muted)';
+      const perDate = megaDates.map((d) => ({ date: d, ...sumUp(mrows.filter((r) => r.date === d)) }));
+      const thDay = (d) => new Intl.DateTimeFormat('th-TH', { month: 'short', year: '2-digit', timeZone: 'UTC' }).format(new Date(d + 'T00:00:00Z'));
+      drawVBars(salesBox, [
+        ...perDate.map((t) => ({ short: megaShort(t.date), sub: thDay(t.date), label: megaName(t.date), value: t.net, color: accent, top: compactBaht(t.net), text: `${baht(t.net)} (${pct(allNet ? t.net / allNet : 0)}) · ${count(t.orders)} คำสั่งซื้อ` })),
+        ...(normalDays ? [{ short: 'วันปกติ', sub: 'เฉลี่ย/วัน', label: 'วันปกติ (เฉลี่ยต่อวัน)', value: normPerDay, color: normalColor, top: compactBaht(normPerDay), text: `${baht(normPerDay)} ต่อวัน · ${days(normTot.orders / normalDays)} คำสั่งซื้อต่อวัน` }] : []),
+      ], compactBaht);
+      drawVBars(marginBox, [
+        ...perDate.map((t) => ({ short: megaShort(t.date), sub: thDay(t.date), label: megaName(t.date), value: margin(t), color: accent, top: pct(margin(t)), text: t.net ? `${pct(margin(t))} · กำไรขั้นต้น ${baht(t.net - t.cost)}` : '—' })),
+        ...(normTot.net ? [{ short: 'วันปกติ', sub: 'รวมทุกวัน', label: 'วันปกติ (รวมทุกวัน)', value: margin(normTot), color: normalColor, top: pct(margin(normTot)), text: `${pct(margin(normTot))} · กำไรขั้นต้น ${baht(normTot.net - normTot.cost)}` }] : []),
+      ], (v) => new Intl.NumberFormat('th-TH', { style: 'percent', maximumFractionDigits: 0 }).format(v));
+      const bestDay = perDate.slice().sort((a, b) => b.net - a.net)[0];
+      mega = { days: megaDates.length, share: allNet ? megaTot.net / allNet : 0, megaPerDay, normPerDay, mMargin: margin(megaTot), nMargin: margin(normTot), bestDay };
+    } else if (megaSrc.status === 'loading') { salesBox.replaceChildren(); marginBox.replaceChildren(); }
+    else { failLine(salesBox); failLine(marginBox); }
+
+    // The only numbers the executive summary sends: no order rows, at most 30 values
+    const r2 = (v) => Math.round(v * 100) / 100;
+    const nReturn = d3.sum(rows.filter((r) => r.status === 'คืนสินค้า'), (r) => r.orders);
+    const byNet = months.slice().sort((a, b) => b.net - a.net);
+    const firstOf = (list, key) => list.length ? { ชื่อ: list[0][key], สัดส่วนยอดขาย_ร้อยละ: r2(100 * list[0].net / (d3.sum(list, (d) => d.net) || 1)) } : null;
+    const monthName = (m) => monthShort(m) + ' ' + yearBE(m);
+    latestSummary = nOk && byNet.length ? {
+      ขอบเขตข้อมูล: scope,
+      ยอดขายสุทธิ_บาท: Math.round(net),
+      คำสั่งซื้อสำเร็จ: nOk,
+      AOV_บาท: r2(net / nOk),
+      อัตรายกเลิก_ร้อยละ: r2(100 * nCancel / inFilter),
+      คำสั่งซื้อทั้งหมด: inFilter,
+      คำสั่งซื้อยกเลิก: nCancel,
+      คำสั่งซื้อคืนสินค้า: nReturn,
+      เดือนยอดสูงสุด: { เดือน: monthName(byNet[0].month), ยอดขาย_บาท: Math.round(byNet[0].net) },
+      เดือนยอดต่ำสุด: { เดือน: monthName(byNet[byNet.length - 1].month), ยอดขาย_บาท: Math.round(byNet[byNet.length - 1].net) },
+      ช่องทางอันดับแรก: firstOf(channels, 'channel'),
+      ภูมิภาคอันดับแรก: firstOf(regions, 'region'),
+      จังหวัดอันดับแรก: firstOf(provinces, 'province'),
+      บริษัทขนส่งอันดับแรก: carriers.length ? { ...firstOf(carriers, 'carrier'), ส่งเฉลี่ย_วัน: carriers[0].shipOrders ? r2(carriers[0].shipDays / carriers[0].shipOrders) : null } : null,
+      ...(mega ? { วันเมกะเซล: {
+        จำนวนวัน: mega.days,
+        สัดส่วนยอดขาย_ร้อยละ: r2(100 * mega.share),
+        ยอดขายเฉลี่ยต่อวัน_บาท: Math.round(mega.megaPerDay),
+        วันปกติยอดขายเฉลี่ยต่อวัน_บาท: Math.round(mega.normPerDay),
+        กำไรขั้นต้น_ร้อยละ: r2(100 * mega.mMargin),
+        วันปกติกำไรขั้นต้น_ร้อยละ: r2(100 * mega.nMargin),
+        วันยอดสูงสุด: mega.bestDay ? megaShort(mega.bestDay.date) : null,
+        วันยอดสูงสุดยอดขาย_บาท: mega.bestDay ? Math.round(mega.bestDay.net) : null,
+      } } : {}),
+    } : null;
+    execBtn.disabled = !latestSummary;
+    drawReport();
+  }
+  dash.onData(render);
+  const linkedTab = location.hash.slice(1);
+  if (tabs.some((t) => t.dataset.tab === linkedTab)) showTab(linkedTab, false);
+</script>
